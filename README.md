@@ -1,0 +1,445 @@
+# 🏛️ Idox Public Protection Knowledge Base
+
+A sophisticated AI-powered RAG (Retrieval-Augmented Generation) system for the Idox Public Protection System documentation. Features a modern blue-themed interface, Claude 4.0 Sonnet intelligence, and Amazon Titan v2 embeddings for semantic search across regulatory documentation.
+
+## ✨ Features
+
+- **🧠 Advanced AI Integration**: Claude 4.0 Sonnet for intelligent, contextual responses
+- **🔍 Semantic Search**: Amazon Titan Embed Text v2 with 1024-dimensional vectors
+- **🎨 Modern Professional UI**: Sophisticated blue-themed interface designed for government agencies
+- **📱 Responsive Design**: Mobile-optimized with smooth animations and professional styling
+- **🎯 Pure Vector Search**: No keyword fallbacks - pure AI semantic understanding
+- **📊 Smart Analytics**: AI usage tracking with confidence scoring and performance metrics
+- **💾 Comprehensive Coverage**: 969 document chunks across 27 user guide modules
+- **⚡ Real-time Search**: Instant suggestions and search history with persistence
+
+## 🏗️ System Architecture
+
+### Technology Stack
+- **Frontend**: Next.js 15+ with App Router, TypeScript, Tailwind CSS
+- **Backend**: Node.js with PostgreSQL and pgvector extension
+- **AI Services**: AWS Bedrock Claude 4.0 Sonnet (`us.anthropic.claude-sonnet-4-20250514-v1:0`)
+- **Embeddings**: Amazon Titan Embed Text v2 (`amazon.titan-embed-text-v2:0`)
+- **Database**: PostgreSQL with vector similarity search (1024-dimensional vectors)
+- **UI Components**: Radix UI with custom blue theme
+- **Icons**: Lucide React for consistent iconography
+
+### System Components
+
+1. **📚 Document Processing Pipeline**
+   - Processes 27 comprehensive user guide files
+   - Intelligent chunking with context preservation (800 tokens with 100-token overlap)
+   - Generates 1024-dimensional embeddings using Amazon Titan v2
+   - Stores in PostgreSQL with rich metadata and topic classification
+
+2. **🔍 Advanced Search & Retrieval**
+   - Pure vector similarity search using pgvector with cosine distance
+   - IVFFlat indexing for sub-second response times
+   - Context-aware result ranking with similarity scoring
+   - No keyword fallbacks - 100% semantic understanding
+
+3. **🤖 AI Response Generation**
+   - Claude 4.0 Sonnet for natural language responses
+   - Source citation with confidence scoring
+   - Regulatory compliance context maintained
+   - Professional government-appropriate language
+
+4. **🎨 Modern Frontend Interface**
+   - Sophisticated blue gradient header design
+   - Card-based layout with shadows and animations
+   - Real-time search with intelligent suggestions
+   - Tabbed results (AI Answer vs. Detailed Sources)
+   - Search history with confidence indicators
+   - Professional enterprise appearance
+
+## 📊 Database Schema
+
+```sql
+-- Enhanced schema with Titan v2 1024-dimensional vectors
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE document_chunks (
+    id SERIAL PRIMARY KEY,
+    source_file VARCHAR(255) NOT NULL,
+    section_title TEXT,
+    chunk_text TEXT NOT NULL,
+    chunk_index INTEGER NOT NULL,
+    token_count INTEGER NOT NULL,
+    embedding VECTOR(1024), -- Amazon Titan v2 dimensions
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Performance indexes
+CREATE INDEX idx_document_chunks_source_file 
+ON document_chunks(source_file);
+
+CREATE INDEX idx_document_chunks_embedding 
+ON document_chunks USING ivfflat (embedding vector_cosine_ops) 
+WITH (lists = 100);
+
+-- AI usage tracking
+CREATE TABLE ai_usage_logs (
+    id SERIAL PRIMARY KEY,
+    prompt_type VARCHAR(255) NOT NULL,
+    prompt_name VARCHAR(255) NOT NULL,
+    endpoint VARCHAR(255) NOT NULL,
+    model VARCHAR(255) NOT NULL,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    total_tokens INTEGER,
+    duration DECIMAL,
+    success BOOLEAN NOT NULL,
+    error_message TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+## 🛠️ Setup & Installation
+
+### Prerequisites
+- Node.js 18+ and npm
+- PostgreSQL database with pgvector extension
+- AWS account with Bedrock access (Claude 4.0 and Titan v2 models)
+
+### Installation Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/burkedavid/pp-rag-system.git
+   cd pp-rag-system
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**
+   Create `.env.local`:
+   ```env
+   # Database Configuration
+   DATABASE_URL=postgresql://user:pass@host:5432/dbname
+
+   # AWS Bedrock Configuration (Required for AI features)
+   AWS_ACCESS_KEY_ID=your_access_key_id
+   AWS_SECRET_ACCESS_KEY=your_secret_access_key
+   AWS_REGION=us-east-1
+
+   # Claude Model Configuration (using inference profile)
+   CLAUDE_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
+
+   # App Configuration
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+
+4. **Initialize the database**
+   The database will be automatically initialized when you run the embedding generation script.
+
+5. **Generate embeddings for all documentation**
+   ```bash
+   node scripts/generate-embeddings.js
+   ```
+   
+   **⏱️ Processing Time**: This will process all 27 user guide files and generate 969 document chunks with Titan v2 embeddings. Expect 15-20 minutes for complete processing.
+
+   **📊 What happens during embedding generation:**
+   - Parses all 27 markdown user guide files
+   - Creates intelligent document chunks (800 tokens with overlap)
+   - Generates 1024-dimensional embeddings using Amazon Titan v2
+   - Stores chunks with metadata in PostgreSQL
+   - Creates vector indexes for fast similarity search
+
+6. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+Visit `http://localhost:3000` to access the modern knowledge base interface.
+
+## 📖 Usage Guide
+
+### Example Queries
+
+The system expertly handles questions about all aspects of public protection:
+
+**🍽️ Environmental Health:**
+- "What are the steps for a routine food safety inspection?"
+- "How do I process a new food business registration?"
+- "What is the process for investigating food poisoning incidents?"
+
+**🛡️ Trading Standards:**
+- "How do I handle consumer complaints about product safety?"
+- "What are the procedures for weights and measures inspections?"
+
+**🍺 Licensing:**
+- "What documents are needed for an alcohol license application?"
+- "How do I process temporary event notices?"
+
+**🏠 Housing:**
+- "What are the HMO licensing requirements?"
+- "How do I conduct housing standards inspections?"
+
+**⚖️ Enforcement:**
+- "How do I issue an improvement notice?"
+- "What is the prosecution process for regulatory offenses?"
+
+### API Endpoints
+
+- `POST /api/ask` - RAG query with Claude 4.0 AI-generated response
+- `POST /api/search` - Pure vector similarity search with sources
+- `GET /api/suggestions` - Intelligent query suggestions
+- `GET /api/documents` - List available source documents
+
+### Response Format
+
+```json
+{
+  "answer": "Detailed AI-generated response using Claude 4.0...",
+  "sources": [
+    {
+      "source_file": "02-Inspections-Management-User-Guide.md",
+      "section_title": "Routine Food Safety Inspection Workflow",
+      "similarity": 0.8745
+    }
+  ],
+  "confidence": "high",
+  "note": "AI-powered response using Claude 4.0 with Amazon Titan semantic search"
+}
+```
+
+## 🚀 Adding New Documentation
+
+### Adding Individual Documents
+
+1. **Place new markdown files** in the `/User Guide` directory
+2. **Run the embedding generation script:**
+   ```bash
+   node scripts/generate-embeddings.js
+   ```
+   The script will automatically detect and process new files while preserving existing embeddings.
+
+### Bulk Documentation Updates
+
+1. **Replace or add multiple files** in `/User Guide`
+2. **Clear existing embeddings** (if doing a complete refresh):
+   ```sql
+   TRUNCATE TABLE document_chunks;
+   ```
+3. **Regenerate all embeddings:**
+   ```bash
+   node scripts/generate-embeddings.js
+   ```
+
+### Supported Document Formats
+
+- **Markdown (.md)** files with frontmatter
+- **Automatic parsing** of headers, lists, code blocks, and tables
+- **Intelligent chunking** preserves document structure and context
+- **Metadata extraction** for topic classification and search enhancement
+
+### Document Processing Features
+
+- **Smart Chunking**: 800-token chunks with 100-token overlap for context preservation
+- **Topic Classification**: Automatic categorization (premises_management, inspections, licensing, etc.)
+- **Section Preservation**: Maintains document structure and headings
+- **Metadata Enhancement**: Adds file numbers, section types, and procedure detection
+
+## 🎨 Modern Interface Features
+
+### Professional Blue Theme
+- **Primary Blue**: #1e40af (deep blue for headers)
+- **Secondary Blue**: #3b82f6 (bright blue for buttons)
+- **Accent Blue**: #60a5fa (light blue for hover states)
+- **Background**: #f8fafc (clean off-white backdrop)
+
+### Advanced UI Components
+- **Gradient Header**: Professional blue gradient with pattern overlay
+- **Card-Based Layout**: Modern cards with shadows and rounded corners
+- **Interactive Elements**: Smooth hover animations and transitions
+- **Search Interface**: Large, prominent search bar with blue accents
+- **Result Display**: Tabbed interface with enhanced typography
+- **Mobile Optimized**: Responsive design with touch-friendly interactions
+
+### User Experience Features
+- **Search History**: Grid-based layout with confidence indicators
+- **Example Questions**: Interactive cards with call-to-action styling
+- **Real-time Feedback**: Loading states and progress indicators
+- **Professional Footer**: Clean attribution and system information
+
+## 🔧 Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production with type checking
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint for code quality
+- `npm run typecheck` - TypeScript type checking
+- `node scripts/generate-embeddings.js` - Generate/update embeddings
+
+### Key Architecture Files
+
+**Core AI & Database:**
+- `/src/lib/database.ts` - PostgreSQL operations and vector search
+- `/src/lib/embeddings.ts` - Amazon Titan v2 embedding generation
+- `/src/lib/claude.ts` - Claude 4.0 integration for RAG responses
+- `/src/lib/ai-audit.ts` - AI usage tracking and analytics
+
+**API Routes:**
+- `/src/app/api/ask/route.ts` - RAG endpoint with pure vector search
+- `/src/app/api/search/route.ts` - Detailed source search
+- `/src/app/api/suggestions/route.ts` - Query suggestions
+
+**Frontend Components:**
+- `/src/components/search-interface.tsx` - Main modern blue-themed interface
+- `/src/components/ui/` - Reusable UI components with professional styling
+- `/src/lib/utils.ts` - Utility functions for formatting and highlighting
+
+**Scripts:**
+- `/scripts/generate-embeddings.js` - Complete document processing pipeline
+
+## 📊 Performance & Monitoring
+
+### Optimizations
+- **Vector Indexing**: IVFFlat index for sub-second similarity search on 969 chunks
+- **Pure Vector Search**: No keyword fallbacks for optimal semantic accuracy
+- **Intelligent Chunking**: Context-preserving chunks with optimal token utilization
+- **Caching**: Application-level caching for improved response times
+- **Batch Processing**: Efficient embedding generation with rate limiting
+
+### Analytics & Tracking
+- **AI Usage Logs**: Complete tracking of Claude 4.0 usage and costs
+- **Search Analytics**: Query patterns, confidence scores, and result quality
+- **Performance Metrics**: Response times, similarity scores, and user interactions
+- **Source Attribution**: Detailed tracking of document section usage
+
+### System Statistics
+- **📚 Total Documents**: 27 comprehensive user guides
+- **🔢 Total Chunks**: 969 intelligently processed document chunks
+- **📏 Vector Dimensions**: 1024 (Amazon Titan v2)
+- **⚡ Search Performance**: Sub-second vector similarity search
+- **🎯 Coverage**: Complete Idox Public Protection System documentation
+
+## 🔒 Security & Compliance
+
+- **🔐 Secure Credentials**: Environment-based AWS credential management
+- **🌐 HTTPS**: Encrypted communication in production
+- **📊 Data Protection**: Public documentation with no sensitive data
+- **🛡️ API Security**: Rate limiting and input validation
+- **✅ Audit Trail**: Complete AI usage logging for compliance
+
+## 🚀 Production Deployment
+
+### Vercel Deployment (Recommended)
+
+1. **Connect repository** to Vercel dashboard
+2. **Configure environment variables:**
+   ```env
+   DATABASE_URL=postgresql://...
+   AWS_ACCESS_KEY_ID=...
+   AWS_SECRET_ACCESS_KEY=...
+   AWS_REGION=us-east-1
+   CLAUDE_MODEL_ID=us.anthropic.claude-sonnet-4-20250514-v1:0
+   ```
+3. **Deploy**: Automatic deployment on git push
+
+### Database Setup for Production
+
+**Recommended: Neon Database**
+- Built-in pgvector support
+- Automatic scaling
+- Simple setup with connection string
+
+**Alternative: Supabase**
+- PostgreSQL with extensions
+- Built-in vector support
+- Additional real-time features
+
+## 📚 Documentation Coverage
+
+The system includes comprehensive coverage of:
+
+```
+📁 User Guide/ (27 files, 969 chunks)
+├── 00-System-Overview.md (47 chunks)
+├── 01-Premises-Management-User-Guide.md (54 chunks)
+├── 02-Inspections-Management-User-Guide.md (41 chunks)
+├── 03-Complaints-Management-User-Guide.md (35 chunks)
+├── 04-Licensing-Management-User-Guide.md (34 chunks)
+├── 05-Enforcement-Management-User-Guide.md (40 chunks)
+├── 06-Mobile-Working-User-Guide.md (40 chunks)
+├── 07-User-Management-Security-User-Guide.md (42 chunks)
+├── 08-System-Configuration-User-Guide.md (41 chunks)
+├── 09-System-Integrations-User-Guide.md (36 chunks)
+├── 10-Reports-Analytics-User-Guide.md (40 chunks)
+├── 14-Samples-Management-User-Guide.md (31 chunks)
+├── 15-Accidents-RIDDOR-User-Guide.md (35 chunks)
+├── 16-Food-Poisoning-Management-User-Guide.md (33 chunks)
+├── 17-Prosecutions-Management-User-Guide.md (32 chunks)
+├── 18-Dogs-Management-User-Guide.md (35 chunks)
+├── 19-Planning-Management-User-Guide.md (33 chunks)
+├── 20-Grants-Management-User-Guide.md (33 chunks)
+├── 21-Bookings-Management-User-Guide.md (33 chunks)
+├── 22-Initiatives-Management-User-Guide.md (36 chunks)
+├── 23-Notices-Management-User-Guide.md (36 chunks)
+├── 24-GIS-Mapping-User-Guide.md (22 chunks)
+├── 25-Communications-Admin-User-Guide.md (24 chunks)
+├── 26-Audit-Trail-User-Guide.md (24 chunks)
+├── 27-End-to-End-Regulatory-Processes.md (39 chunks)
+├── 28-Daily-Operations-Guide.md (34 chunks)
+└── 29-Role-Based-Handbooks.md (39 chunks)
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Follow the existing code style and TypeScript practices
+4. Test your changes with the development server
+5. Commit changes: `git commit -m 'Add amazing feature'`
+6. Push to branch: `git push origin feature/amazing-feature`
+7. Submit a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support & Troubleshooting
+
+### Common Issues
+
+**CSS Not Loading:**
+- Clear browser cache (Ctrl+F5)
+- Check DevTools Network tab for CSS loading errors
+- Restart development server
+
+**Embedding Generation Errors:**
+- Verify AWS credentials and permissions
+- Check Bedrock model access in your AWS region
+- Ensure sufficient API limits for Titan v2
+
+**Search Not Working:**
+- Verify database connection and pgvector extension
+- Check if embeddings were generated successfully
+- Review API logs for error messages
+
+### Support Channels
+- **GitHub Issues**: Technical issues and feature requests
+- **Documentation**: Complete user guides in `/User Guide` directory
+- **API Testing**: Use the included examples and test queries
+
+## 🙏 Acknowledgments
+
+- **🏛️ Idox Group**: Comprehensive Public Protection System documentation
+- **🤖 AWS Bedrock**: Claude 4.0 and Titan v2 AI services
+- **🔍 pgvector**: High-performance vector similarity search
+- **⚡ Vercel**: Seamless deployment and hosting platform
+- **🎨 Radix UI**: Professional component library
+- **💙 Tailwind CSS**: Modern styling framework
+
+---
+
+**🚀 Built with cutting-edge AI technology for modern government agencies**
+
+*Last updated: August 2025*
