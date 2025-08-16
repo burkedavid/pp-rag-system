@@ -604,7 +604,7 @@ export default function SearchInterface() {
         <div className="text-center py-8 text-slate-500">
           <div className="max-w-2xl mx-auto space-y-2">
             <p className="text-sm">
-              © 2024 Idox Public Protection Knowledge Base. Powered by Claude 4.0 and Amazon Titan v2.
+              © 2025 Idox Public Protection Knowledge Base. Powered by Claude 4.0 and Amazon Titan v2.
             </p>
             <p className="text-xs">
               All responses are generated from official documentation. Please verify critical information with current regulations.

@@ -5,13 +5,15 @@ A sophisticated AI-powered RAG (Retrieval-Augmented Generation) system for the I
 ## ✨ Features
 
 - **🧠 Advanced AI Integration**: Claude 4.0 Sonnet for intelligent, contextual responses
-- **🔍 Semantic Search**: Amazon Titan Embed Text v2 with 1024-dimensional vectors
-- **🎨 Modern Professional UI**: Sophisticated blue-themed interface designed for government agencies
+- **🔍 Hybrid Search**: 70% semantic + 30% keyword search for optimal results
+- **🎨 Modern Professional UI**: Sophisticated blue-themed interface with professional loading animations
 - **📱 Responsive Design**: Mobile-optimized with smooth animations and professional styling
-- **🎯 Pure Vector Search**: No keyword fallbacks - pure AI semantic understanding
-- **📊 Smart Analytics**: AI usage tracking with confidence scoring and performance metrics
+- **🎯 Optimized Search Performance**: Tuned similarity thresholds and confidence scoring
+- **📊 Smart Analytics**: AI usage tracking with enhanced confidence scoring and tooltips
 - **💾 Comprehensive Coverage**: 969 document chunks across 27 user guide modules
-- **⚡ Real-time Search**: Instant suggestions and search history with persistence
+- **⚡ Real-time Search**: Instant suggestions, search history, and professional loading states
+- **🏠 Enhanced Navigation**: Easy-to-use Home button for seamless user experience
+- **💡 Intelligent Tooltips**: Detailed confidence explanations for user transparency
 
 ## 🏗️ System Architecture
 
@@ -33,24 +35,26 @@ A sophisticated AI-powered RAG (Retrieval-Augmented Generation) system for the I
    - Stores in PostgreSQL with rich metadata and topic classification
 
 2. **🔍 Advanced Search & Retrieval**
-   - Pure vector similarity search using pgvector with cosine distance
+   - Hybrid search combining semantic (70%) and keyword (30%) search
+   - Optimized similarity threshold (0.3) for improved recall
    - IVFFlat indexing for sub-second response times
-   - Context-aware result ranking with similarity scoring
-   - No keyword fallbacks - 100% semantic understanding
+   - Context-aware result ranking with enhanced similarity scoring
 
 3. **🤖 AI Response Generation**
    - Claude 4.0 Sonnet for natural language responses
-   - Source citation with confidence scoring
+   - Enhanced confidence scoring algorithm for better accuracy
+   - Source citation with detailed similarity scores
    - Regulatory compliance context maintained
    - Professional government-appropriate language
 
 4. **🎨 Modern Frontend Interface**
-   - Sophisticated blue gradient header design
+   - Sophisticated blue gradient header design with Home navigation
+   - Professional loading animations with progress indicators
    - Card-based layout with shadows and animations
    - Real-time search with intelligent suggestions
    - Tabbed results (AI Answer vs. Detailed Sources)
-   - Search history with confidence indicators
-   - Professional enterprise appearance
+   - Search history with confidence indicators and tooltips
+   - Enhanced user experience with visual feedback
 
 ## 📊 Database Schema
 
