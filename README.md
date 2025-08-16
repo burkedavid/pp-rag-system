@@ -14,6 +14,8 @@ A sophisticated AI-powered RAG (Retrieval-Augmented Generation) system for the I
 - **⚡ Real-time Search**: Instant suggestions, search history, and professional loading states
 - **🏠 Enhanced Navigation**: Easy-to-use Home button for seamless user experience
 - **💡 Intelligent Tooltips**: Detailed confidence explanations for user transparency
+- **🔗 Related Questions**: AI-generated software-specific follow-up questions using Claude 4.0
+- **📱 Smooth Navigation**: Auto-scroll to top when clicking related questions for optimal UX
 
 ## 🏗️ System Architecture
 
@@ -203,10 +205,12 @@ The system expertly handles questions about all aspects of public protection. **
 - `POST /api/ask` - RAG query with Claude 4.0 AI-generated response
 - `POST /api/search` - Pure vector similarity search with sources
 - `GET /api/suggestions` - Intelligent query suggestions
+- `POST /api/related` - Generate software-specific follow-up questions using Claude 4.0
 - `GET /api/documents` - List available source documents
 
 ### Response Format
 
+#### RAG Query Response (`/api/ask`)
 ```json
 {
   "answer": "Detailed AI-generated response using Claude 4.0...",
@@ -219,6 +223,30 @@ The system expertly handles questions about all aspects of public protection. **
   ],
   "confidence": "high",
   "note": "AI-powered response using Claude 4.0 with Amazon Titan semantic search"
+}
+```
+
+#### Related Questions Response (`/api/related`)
+```json
+{
+  "relatedQuestions": [
+    "How do I create a new license application in Idox?",
+    "Can I bulk import license applications into Idox?", 
+    "How do I set up automated license renewal reminders?",
+    "What screen do I use to view application history?",
+    "How do I configure email notifications in the system?"
+  ],
+  "query": "How do I access the licensing module in Idox?",
+  "note": "Related questions generated using Claude 4.0"
+}
+```
+
+**Related Questions Request Format:**
+```json
+{
+  "query": "Original user query",
+  "sources": [{"source_file": "...", "section_title": "...", "similarity": 0.85}],
+  "answer": "AI-generated answer from the original query..."
 }
 ```
 
@@ -492,6 +520,8 @@ node scripts/quick-test.js
 - **Navigation**: Easy-to-use Home button with state reset functionality
 - **Search History**: Grid-based layout with confidence indicators and tooltips
 - **Example Questions**: Interactive cards showcasing high-confidence queries
+- **Related Questions**: AI-generated follow-up questions with amber-themed design
+- **Smart Navigation**: Auto-scroll to top when selecting related questions
 - **Loading Experience**: Professional animations with status indicators
 - **Confidence Transparency**: Hover tooltips explaining confidence levels
 - **Real-time Feedback**: Enhanced loading states and progress indicators
@@ -520,6 +550,7 @@ node scripts/quick-test.js
 - `/src/app/api/ask/route.ts` - RAG endpoint with pure vector search
 - `/src/app/api/search/route.ts` - Detailed source search
 - `/src/app/api/suggestions/route.ts` - Query suggestions
+- `/src/app/api/related/route.ts` - AI-generated software-specific follow-up questions
 
 **Frontend Components:**
 - `/src/components/search-interface.tsx` - Main modern blue-themed interface
