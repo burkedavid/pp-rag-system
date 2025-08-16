@@ -39,6 +39,7 @@ interface SearchHistory {
 export default function SearchInterface() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('');
   const [ragResponse, setRagResponse] = useState<RAGResponse | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -96,28 +97,41 @@ export default function SearchInterface() {
 
     setIsLoading(true);
     setShowSuggestions(false);
+    setLoadingStatus('🔍 Searching knowledge base...');
+    
+    console.log('Searching for:', searchQuery);
     
     try {
-      // Perform RAG query
+      // Start both searches
+      setLoadingStatus('📊 Analyzing your question...');
+      
       const ragPromise = fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchQuery })
       });
 
-      // Perform detailed search for sources tab
       const searchPromise = fetch('/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchQuery, limit: 10 })
       });
 
+      setLoadingStatus('🤖 Generating AI response...');
       const [ragRes, searchRes] = await Promise.all([ragPromise, searchPromise]);
+
+      setLoadingStatus('✨ Finalizing results...');
 
       if (ragRes.ok) {
         const ragData = await ragRes.json();
+        console.log('RAG Response received:', ragData);
+        console.log('RAG Answer content:', ragData.answer);
+        console.log('RAG Response type:', typeof ragData.answer);
+        console.log('RAG Answer length:', ragData.answer?.length);
         setRagResponse(ragData);
         saveToHistory(searchQuery, ragData.confidence);
+      } else {
+        console.error('RAG request failed:', ragRes.status, await ragRes.text());
       }
 
       if (searchRes.ok) {
@@ -128,8 +142,11 @@ export default function SearchInterface() {
       setActiveTab('answer');
     } catch (error) {
       console.error('Search error:', error);
+      setLoadingStatus('❌ Search failed. Please try again.');
+      setTimeout(() => setLoadingStatus(''), 3000);
     } finally {
       setIsLoading(false);
+      setLoadingStatus('');
     }
   };
 
@@ -223,6 +240,27 @@ export default function SearchInterface() {
                   </Button>
                 </div>
               </div>
+
+              {/* Enhanced Loading Status Indicator */}
+              {isLoading && loadingStatus && (
+                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border border-blue-200 rounded-xl shadow-sm">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <span className="text-blue-800 font-medium">{loadingStatus}</span>
+                  </div>
+                  <div className="w-full bg-blue-200 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{
+                      width: loadingStatus.includes('Searching') ? '25%' : 
+                             loadingStatus.includes('Analyzing') ? '50%' : 
+                             loadingStatus.includes('Generating') ? '75%' : 
+                             loadingStatus.includes('Finalizing') ? '90%' : '100%'
+                    }}></div>
+                  </div>
+                  <div className="mt-2 text-xs text-blue-600">
+                    This usually takes 10-15 seconds for comprehensive AI analysis
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Modern Suggestions Dropdown */}
@@ -342,6 +380,7 @@ export default function SearchInterface() {
                 {/* Enhanced Answer Display */}
                 <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-6 border border-blue-100">
                   <div className="prose prose-lg max-w-none text-slate-800 leading-relaxed">
+                    {console.log('Rendering answer:', ragResponse.answer)}
                     <ReactMarkdown>
                       {ragResponse.answer}
                     </ReactMarkdown>
