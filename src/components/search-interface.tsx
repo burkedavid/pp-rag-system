@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Search, Loader2, FileText, ExternalLink, Clock, Home, Utensils, Dog, Users, Shield, AlertTriangle, Gavel, Building2, Star, Scale, MapPin, ClipboardList } from 'lucide-react';
+import { Search, Loader2, FileText, ExternalLink, Clock, Home, Utensils, Dog, Users, Shield, AlertTriangle, Gavel, Building2, Star, Scale, MapPin, ClipboardList, ArrowRight, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,6 +47,8 @@ export default function SearchInterface() {
   const [searchHistory, setSearchHistory] = useState<SearchHistory[]>([]);
   const [activeTab, setActiveTab] = useState<'answer' | 'sources'>('answer');
   const [activeModule, setActiveModule] = useState<string>('food-safety');
+  const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
 
   // Load search history from localStorage
   useEffect(() => {
@@ -131,6 +133,37 @@ export default function SearchInterface() {
         console.log('RAG Answer length:', ragData.answer?.length);
         setRagResponse(ragData);
         saveToHistory(searchQuery, ragData.confidence);
+
+        // Generate related questions in the background
+        if (ragData.answer && ragData.sources) {
+          setLoadingRelated(true);
+          fetch('/api/related', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              query: searchQuery, 
+              sources: ragData.sources, 
+              answer: ragData.answer 
+            })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.relatedQuestions) {
+              setRelatedQuestions(data.relatedQuestions);
+            }
+          })
+          .catch(error => {
+            console.error('Related questions error:', error);
+            // Set fallback related questions
+            setRelatedQuestions([
+              "What are the next steps in this process?",
+              "Are there any exceptions to this procedure?",
+              "What documentation is required?",
+              "How do I handle special cases?"
+            ]);
+          })
+          .finally(() => setLoadingRelated(false));
+        }
       } else {
         console.error('RAG request failed:', ragRes.status, await ragRes.text());
       }
@@ -155,6 +188,8 @@ export default function SearchInterface() {
     setQuery(suggestion);
     setShowSuggestions(false);
     handleSearch(suggestion);
+    // Scroll to top to see the new answer
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleHistoryClick = (historyQuery: string) => {
@@ -166,6 +201,7 @@ export default function SearchInterface() {
     setQuery('');
     setRagResponse(null);
     setSearchResults([]);
+    setRelatedQuestions([]);
     setShowSuggestions(false);
     setActiveTab('answer');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -471,34 +507,47 @@ export default function SearchInterface() {
                   </div>
                 </div>
 
-                {/* Modern Sources Summary */}
-                {ragResponse.sources.length > 0 && (
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-slate-800 flex items-center">
-                      <FileText className="h-5 w-5 mr-2 text-blue-600" />
-                      Referenced Sources
-                    </h4>
-                    <div className="grid gap-3">
-                      {ragResponse.sources.map((source, index) => (
-                        <div key={index} className="group flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border border-blue-200 rounded-xl hover:shadow-md transition-all duration-200">
-                          <div className="space-y-1">
-                            <div className="font-semibold text-slate-800 group-hover:text-blue-800 transition-colors">
-                              {formatSourceFile(source.source_file)}
-                            </div>
-                            {source.section_title && (
-                              <div className="text-sm text-slate-600">
-                                Section: {source.section_title}
+
+                {/* Related Follow-up Questions */}
+                {(relatedQuestions.length > 0 || loadingRelated) && (
+                  <div className="space-y-4 mt-8 pt-6 border-t border-blue-100">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Lightbulb className="h-5 w-5 text-amber-500" />
+                      <h4 className="text-lg font-semibold text-slate-800">Related Questions</h4>
+                      {loadingRelated && (
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                      )}
+                    </div>
+                    
+                    {loadingRelated ? (
+                      <div className="grid md:grid-cols-2 gap-3">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div key={i} className="animate-pulse">
+                            <div className="h-16 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg"></div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid md:grid-cols-2 gap-3">
+                        {relatedQuestions.map((question, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSuggestionClick(question)}
+                            className="group text-left p-4 rounded-lg border border-amber-200 hover:border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 transition-all duration-200 shadow-sm hover:shadow-md"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-amber-800 transition-colors pr-2">
+                                {question}
                               </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-medium">
-                              {Math.round(source.similarity * 100)}% match
-                            </span>
-                            <ExternalLink className="h-4 w-4 text-blue-600 opacity-50 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                        </div>
-                      ))}
+                              <ArrowRight className="h-4 w-4 text-amber-600 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 mt-0.5" />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="text-xs text-slate-500 text-center mt-3">
+                      💡 Click any question to explore further
                     </div>
                   </div>
                 )}

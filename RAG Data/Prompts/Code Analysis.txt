@@ -1,0 +1,95 @@
+# Task: Generate RAG Documentation from Source Code Analysis
+
+You are tasked with creating comprehensive markdown documentation files for each module of the Idoxcloud Public Protection System by analyzing the actual source code. This documentation will be used to create embeddings for a RAG (Retrieval-Augmented Generation) system to help end users understand the system.
+
+## Critical Requirements
+
+1. **ONLY document what exists in the source code** - Never invent or assume functionality
+2. **Base all content on actual code analysis** - Examine classes, methods, database interactions, and templates
+3. **Create one markdown file per module** - Based on the modules visible in the UI navigation
+4. **Include complete workflow documentation** - From start to finish for each process
+5. **Focus on end-user perspective** - How the system works, not implementation details
+
+## Modules to Document (based on UI navigation)
+
+Create separate markdown files for each:
+- Premises
+- Inspections  
+- Samples
+- Accidents
+- Service Requests
+- Prosecutions
+- Initiatives
+- Food Poisoning
+- Search Actions
+- Locations
+- Contacts
+- GIS
+- Notices
+- Planning
+- Grants
+- Dogs
+- Licensing
+- Bookings
+- Complaints Admin
+- Admin
+- Map Info
+- Report Builder
+- Audit Trail
+
+## Analysis Approach
+
+For each module:
+
+1. **Examine the main controller** (`php/mains/main.{Module}.php`)
+2. **Analyze the core class** (`php/classes/class.{Module}.php`) 
+3. **Review related object classes** (`php/objects/object.{Module}.php`)
+4. **Study templates** (`templates/{module}/` directory)
+5. **Check for admin classes** (`php/classes/class.{Module}Admin.php`)
+6. **Look at database interactions** (SQL queries, table structures)
+
+## Documentation Structure for Each Module
+
+Create each markdown file with this structure:
+
+```markdown
+# [Module Name] Module
+
+## Overview
+[What this module does - based on class comments and method analysis]
+
+## Key Functionality
+[List main features found in the source code - method names and purposes]
+
+## Complete Workflow
+[Detailed step-by-step process from start to finish, based on code analysis]
+
+### Starting a [Process]
+[How users initiate the process - based on main controller and templates]
+
+### Data Collection and Validation
+[What information is collected - based on form templates and validation methods]
+
+### Processing and Business Logic
+[What happens behind the scenes - based on class methods]
+
+### Outcomes and Next Steps
+[Possible results and follow-up actions - based on conditional logic in code]
+
+## Data Management
+[How data is stored, retrieved, and updated - based on database methods]
+
+## Integration Points
+[How this module connects with other modules - based on class dependencies]
+
+## User Roles and Permissions
+[Who can do what - based on permission checks in code]
+
+## Reports and Outputs
+[What reports or documents can be generated - based on report methods and templates]
+
+## Common Scenarios
+[Typical use cases found in the code logic]
+
+## Error Handling and Edge Cases
+[How the system handles problems - based on error handling code]

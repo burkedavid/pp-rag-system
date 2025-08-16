@@ -192,3 +192,75 @@ Provide practical, specific questions that would help with daily regulatory work
     return [];
   }
 }
+
+export async function generateRelatedQuestions(
+  originalQuery: string,
+  answer: string,
+  sources: Array<{ source_file: string; section_title: string; similarity: number }>
+): Promise<string[]> {
+  const prompt = `Based on this user query and answer about the Idox Public Protection System SOFTWARE, generate 4-5 related follow-up questions that users might want to ask next about using the SOFTWARE.
+
+Original Query: "${originalQuery}"
+
+Answer Summary: ${answer.substring(0, 500)}...
+
+Source Documents: ${sources.map(s => s.source_file).join(', ')}
+
+Generate practical, specific SOFTWARE INTERFACE questions that would naturally arise from this answer. Focus EXCLUSIVELY on Idox software usage:
+- "How do I navigate to [specific screen/module/tab]?"
+- "Where do I find the [specific button/field/option] in Idox?"
+- "How do I generate/print/export [specific report] from the system?"
+- "How do I configure [specific setting] in the software?"
+- "What screens do I use to [perform specific software task]?"
+- "How do I access the [specific form/workflow] in Idox?"
+
+EXAMPLES of good software questions:
+- "How do I print a license certificate from Idox?"
+- "Where is the bulk import feature located?"
+- "How do I configure email notifications in the system?"
+- "What screen do I use to view application history?"
+
+AVOID general questions about requirements, fees, deadlines, or procedures.
+
+Return ONLY a JSON array of SOFTWARE INTERFACE question strings focused on HOW TO USE the Idox system.`;
+
+  try {
+    const modelId = getModelIdWithOverride();
+    const modelOptions = getModelOptionsForTask('related-questions');
+    
+    const input = {
+      modelId,
+      contentType: 'application/json',
+      accept: 'application/json',
+      body: JSON.stringify({
+        anthropic_version: 'bedrock-2023-05-31',
+        max_tokens: 400,
+        temperature: 0.7,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      }),
+    };
+
+    const command = new InvokeModelCommand(input);
+    const response = await client.send(command);
+    
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const responseText = responseBody.content[0].text;
+
+    // Parse JSON response
+    const jsonMatch = responseText.match(/\[.*\]/s);
+    if (jsonMatch) {
+      const questions = JSON.parse(jsonMatch[0]);
+      return Array.isArray(questions) ? questions.slice(0, 5) : [];
+    }
+
+    throw new Error('No JSON array found in response');
+  } catch (error) {
+    console.error('Error generating related questions:', error);
+    throw error;
+  }
+}

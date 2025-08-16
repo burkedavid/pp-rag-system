@@ -63,6 +63,7 @@ const TASK_MODEL_MAPPING: Record<string, string> = {
   'document-analysis': 'claude-4-sonnet',
   'question-answering': 'claude-4-sonnet',
   'suggestions': 'claude-4-sonnet',
+  'related-questions': 'claude-4-sonnet',
   'default': 'claude-4-sonnet'
 };
 
