@@ -6,7 +6,7 @@
 
 ### Introduction
 
-Together with Tascomi's Public Protection product, the Food Standards Agency website allows food business owners to register their food business online. Any registration submitted via the FSA website will now appear within the Public Protection product ready to be processed.
+Together with Idox's Public Protection product, the Food Standards Agency website allows food business owners to register their food business online. Any registration submitted via the FSA website will now appear within the Public Protection product ready to be processed.
 
 ### Additional Admin Privilege
 

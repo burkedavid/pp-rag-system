@@ -27,8 +27,8 @@ The Display option allows us to change the map interface by interchanging variou
 
 | Option | Description |
 |--------|-------------|
-| Background Layer/Map | This option defines the general background layer used for the Map interface. The options available here will be dependent on those available to your council area or those which you may have provided to Tascomi: OSM |
-| Layers | This option allows the user to select the layers that can be added to your Map interface. The options available here will be dependent on those available to your council area or those which you may have provided to Tascomi: Locations (displays all available locations from within the Public Protection system - clicking on a location point on the map will display additional address information in the top right hand corner of the map interface). |
+| Background Layer/Map | This option defines the general background layer used for the Map interface. The options available here will be dependent on those available to your council area or those which you may have provided to Idox: OSM |
+| Layers | This option allows the user to select the layers that can be added to your Map interface. The options available here will be dependent on those available to your council area or those which you may have provided to Idox: Locations (displays all available locations from within the Public Protection system - clicking on a location point on the map will display additional address information in the top right hand corner of the map interface). |
 | Recentre | Recentres the map based on the Location the map was accessed from. |
 | Street View | Click this option to start street view. The mouse pointer will change to a crosshair allowing the user to click a point on the map at which point street view will open in a new tab. |
 

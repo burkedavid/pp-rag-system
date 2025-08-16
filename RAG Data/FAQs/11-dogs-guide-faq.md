@@ -22,13 +22,13 @@ The 'Search Dogs' option allows the user to find dog records by filling in the r
 
 ## Create Dogs
 
-The 'Create Dogs' option allows the user to create new Dog case records. Tascomi would recommend using the search option initially to ensure that the record has not already been created prior to adding a new record.
+The 'Create Dogs' option allows the user to create new Dog case records. Idox would recommend using the search option initially to ensure that the record has not already been created prior to adding a new record.
 
 When creating a new dog record, the user is prompted to enter the following fields:
 
 | Field Name | Description |
 |------------|-------------|
-| Location | This search option allows the user to find the location/address where the dog was found. If there is not a specific postal address applicable, Tascomi would recommend using generic street records in order to build up a history instead. |
+| Location | This search option allows the user to find the location/address where the dog was found. If there is not a specific postal address applicable, Idox would recommend using generic street records in order to build up a history instead. |
 | Contact | This search option allows the user to choose the contact that reported the lost dog. |
 | Dog Case Type | This drop down option allows users to record the type of dog record being entered. Dog Case Types are managed and maintained via Admin > Dogs > Reported Locations. |
 | LA Reference | Allows the user to record the local authority or council's reference number. |

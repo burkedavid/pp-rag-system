@@ -242,37 +242,37 @@ export default function SearchInterface() {
               </div>
             )}
 
-            {/* Modern Search History */}
+            {/* Optimized Search History */}
             {searchHistory.length > 0 && (
-              <div className="mt-8 pt-6 border-t border-blue-100">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+              <div className="mt-6 pt-6 border-t border-blue-100">
+                <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
                   <Clock className="h-5 w-5 mr-2 text-blue-600" />
                   Recent Searches
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {searchHistory.slice(0, 6).map((item, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {searchHistory.slice(0, 8).map((item, index) => (
                     <button
                       key={index}
                       onClick={() => handleHistoryClick(item.query)}
-                      className="group text-left p-4 rounded-xl border border-blue-200 hover:border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-150 transition-all duration-200 shadow-sm hover:shadow-md"
+                      className="group text-left p-3 rounded-lg border border-blue-200 hover:border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-150 transition-all duration-200 shadow-sm hover:shadow-md"
                     >
-                      <div className="text-sm text-slate-700 font-medium truncate group-hover:text-blue-800 transition-colors">
-                        {truncateText(item.query, 45)}
+                      <div className="text-sm text-slate-700 font-medium group-hover:text-blue-800 transition-colors leading-tight">
+                        {truncateText(item.query, 50)}
                       </div>
-                      {item.confidence && (
-                        <div className="mt-2 flex items-center justify-between">
-                          <span className={cn("text-xs px-2 py-1 rounded-full font-medium", 
+                      <div className="mt-2 flex items-center justify-between">
+                        {item.confidence && (
+                          <span className={cn("text-xs px-1.5 py-0.5 rounded font-medium", 
                             item.confidence === 'high' ? 'bg-green-100 text-green-700' : 
                             item.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' : 
                             'bg-red-100 text-red-700'
                           )}>
-                            {getConfidenceIcon(item.confidence)} {item.confidence}
+                            {getConfidenceIcon(item.confidence)}
                           </span>
-                          <span className="text-xs text-slate-500">
-                            {item.timestamp.toLocaleDateString()}
-                          </span>
-                        </div>
-                      )}
+                        )}
+                        <span className="text-xs text-slate-500">
+                          {item.timestamp.toLocaleDateString()}
+                        </span>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -439,32 +439,35 @@ export default function SearchInterface() {
         {/* Modern Example Questions */}
         {!ragResponse && !isLoading && (
           <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-            <CardHeader className="pb-6">
+            <CardHeader className="pb-4">
               <div className="space-y-2">
-                <CardTitle className="text-2xl font-bold text-slate-800">Example Questions</CardTitle>
-                <p className="text-slate-600">Get started with these common regulatory queries</p>
+                <CardTitle className="text-2xl font-bold text-slate-800">Try These Software Questions</CardTitle>
+                <p className="text-slate-600">Get started with these Idox system interface questions</p>
               </div>
             </CardHeader>
-            <CardContent className="p-8">
-              <div className="grid md:grid-cols-2 gap-4">
+            <CardContent className="p-6">
+              <div className="grid md:grid-cols-3 gap-3">
                 {[
-                  "How do I process a new food business registration?",
-                  "What are the steps for a routine food safety inspection?",
-                  "How do I handle a noise complaint?",
-                  "What documents are needed for an alcohol license application?",
-                  "How do I issue an improvement notice?",
-                  "What is the process for investigating food poisoning?"
+                  "How to use the Inspections module for food safety inspections?",
+                  "How to navigate the Premises module and add new premises?",
+                  "How to process a license application in the Licensing module?",
+                  "How to create and manage service requests in the system?",
+                  "How to use the Complaints module for noise complaints?",
+                  "How to access the Admin module and manage user permissions?",
+                  "How to generate inspection reports from the system?",
+                  "How to link premises records with license applications?",
+                  "How to use the mobile functionality for field inspections?"
                 ].map((example, index) => (
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(example)}
-                    className="group text-left p-6 rounded-2xl border-2 border-blue-200 hover:border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-150 transition-all duration-200 shadow-sm hover:shadow-lg"
+                    className="group text-left p-4 rounded-xl border border-blue-200 hover:border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-150 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
-                    <div className="text-slate-700 font-medium leading-relaxed group-hover:text-blue-800 transition-colors">
+                    <div className="text-sm text-slate-700 font-medium leading-relaxed group-hover:text-blue-800 transition-colors">
                       {example}
                     </div>
                     <div className="mt-2 flex items-center text-blue-600 opacity-50 group-hover:opacity-100 transition-opacity">
-                      <span className="text-xs font-medium">Click to search</span>
+                      <span className="text-xs font-medium">Try this</span>
                       <ExternalLink className="h-3 w-3 ml-1" />
                     </div>
                   </button>

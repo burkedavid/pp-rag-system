@@ -36,7 +36,7 @@ Please note, this screen can also be accessed via the "Add" button found on the 
 
 | Field Name | Field Type | Description |
 |------------|------------|-------------|
-| Prosecution Against | Dropdown List and Related Search Area | This field allows users to select which parent record the prosecution should be linked to. The drop down list of options is predefined by Tascomi. Once an option is selected, the associated search button will allow users to search for the record. Once the prosecution is created, it will appear in the prosecutions left hand menu of the parent record. |
+| Prosecution Against | Dropdown List and Related Search Area | This field allows users to select which parent record the prosecution should be linked to. The drop down list of options is predefined by Idox. Once an option is selected, the associated search button will allow users to search for the record. Once the prosecution is created, it will appear in the prosecutions left hand menu of the parent record. |
 | Officer | Dropdown List | This field allows the user to record the responsible officer. |
 | Core Function | Dropdown List | This field allows the user to record the core function. |
 | Prosecution Type | Dropdown List | This field allows the user to record the prosecution type. Prosecution Types can be managed via Admin > Prosecution > Type of Prosecution. |
