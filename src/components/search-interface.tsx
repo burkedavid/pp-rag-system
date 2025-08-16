@@ -66,7 +66,7 @@ export default function SearchInterface() {
   // Save search history to localStorage
   const saveToHistory = useCallback((query: string, confidence?: 'high' | 'medium' | 'low') => {
     const newEntry = { query, timestamp: new Date(), confidence };
-    const updated = [newEntry, ...searchHistory.slice(0, 9)]; // Keep last 10 searches
+    const updated = [newEntry, ...searchHistory.slice(0, 14)]; // Keep last 15 searches
     setSearchHistory(updated);
     localStorage.setItem('search-history', JSON.stringify(updated));
   }, [searchHistory]);
