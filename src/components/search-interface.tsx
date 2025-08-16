@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Search, Loader2, FileText, ExternalLink, Clock } from 'lucide-react';
+import { Search, Loader2, FileText, ExternalLink, Clock, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -161,32 +161,73 @@ export default function SearchInterface() {
     handleSearch(historyQuery);
   };
 
+  const handleHomeClick = () => {
+    setQuery('');
+    setRagResponse(null);
+    setSearchResults([]);
+    setShowSuggestions(false);
+    setActiveTab('answer');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Modern Header with Gradient */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-800 via-blue-700 to-blue-600"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTAgMGg2MHY2MEgweiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
-        <div className="relative max-w-6xl mx-auto px-6 py-16 text-center">
-          <div className="space-y-6">
+      {/* Professional AI-Powered Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+        {/* Dynamic Background Patterns */}
+        <div className="absolute inset-0">
+          {/* Primary gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-indigo-800/80 to-blue-700/90"></div>
+          
+          {/* Animated mesh gradient */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 via-transparent to-purple-500/10"></div>
+          
+          {/* Tech pattern overlay */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjAuNSIgb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
+          
+          {/* Glowing orbs */}
+          <div className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-radial from-blue-400/20 to-transparent rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-gradient-radial from-purple-400/15 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="relative max-w-6xl mx-auto px-6 py-12">
+          {/* Home Button */}
+          <div className="absolute top-4 left-6">
+            <button
+              onClick={handleHomeClick}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all duration-200 group"
+            >
+              <Home className="h-4 w-4 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium">Home</span>
+            </button>
+          </div>
+
+          <div className="text-center space-y-6">
+            {/* Clean Professional Title */}
             <div className="space-y-3">
-              <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight">
-                Public Protection
-                <span className="block text-blue-200">Knowledge Base</span>
+              <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                Public Protection Knowledge Base
               </h1>
-              <div className="h-1 w-24 bg-blue-300 mx-auto rounded-full shadow-lg"></div>
+              <div className="h-0.5 w-16 bg-blue-300 mx-auto rounded-full"></div>
             </div>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed font-light">
-              Intelligent AI-powered search through Environmental Health, Trading Standards, 
-              Licensing, Housing, and regulatory documentation. Get instant, accurate answers 
-              from official Idox system guidance.
+
+            {/* Concise Description */}
+            <p className="text-lg text-blue-100 max-w-2xl mx-auto leading-relaxed">
+              AI-powered search through comprehensive Idox system documentation. 
+              Get accurate answers from official guidance across all regulatory modules.
             </p>
+
+            {/* Simple Status Badge */}
             <div className="inline-flex items-center px-4 py-2 bg-blue-600/30 backdrop-blur-sm rounded-full border border-blue-400/30">
-              <span className="text-blue-100 text-sm font-medium">Powered by Idox System Documentation</span>
+              <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+              <span className="text-blue-100 text-sm font-medium">Powered by Claude 4.0 & Amazon Titan</span>
             </div>
           </div>
         </div>
+
+        {/* Bottom gradient fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-50 to-transparent"></div>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 -mt-8 relative z-10 space-y-8">
@@ -241,23 +282,48 @@ export default function SearchInterface() {
                 </div>
               </div>
 
-              {/* Enhanced Loading Status Indicator */}
+              {/* Professional Loading Animation */}
               {isLoading && loadingStatus && (
-                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 border border-blue-200 rounded-xl shadow-sm">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                    <span className="text-blue-800 font-medium">{loadingStatus}</span>
-                  </div>
-                  <div className="w-full bg-blue-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{
-                      width: loadingStatus.includes('Searching') ? '25%' : 
-                             loadingStatus.includes('Analyzing') ? '50%' : 
-                             loadingStatus.includes('Generating') ? '75%' : 
-                             loadingStatus.includes('Finalizing') ? '90%' : '100%'
-                    }}></div>
-                  </div>
-                  <div className="mt-2 text-xs text-blue-600">
-                    This usually takes 10-15 seconds for comprehensive AI analysis
+                <div className="mt-6 p-6 bg-white border border-blue-200 rounded-2xl shadow-lg">
+                  <div className="flex flex-col items-center space-y-4">
+                    {/* Animated Search Icon */}
+                    <div className="relative">
+                      <div className="w-16 h-16 border-4 border-blue-100 rounded-full"></div>
+                      <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Search className="h-6 w-6 text-blue-600 animate-pulse" />
+                      </div>
+                    </div>
+                    
+                    {/* Status Text */}
+                    <div className="text-center space-y-2">
+                      <h3 className="text-lg font-semibold text-slate-800">AI Analysis in Progress</h3>
+                      <p className="text-blue-700 font-medium">{loadingStatus}</p>
+                      <p className="text-sm text-slate-500">Typically takes 10-15 seconds for comprehensive results</p>
+                    </div>
+                    
+                    {/* Animated Dots */}
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                    
+                    {/* Process Steps */}
+                    <div className="w-full max-w-md">
+                      <div className="flex justify-between text-xs text-slate-500 mb-2">
+                        <span className={loadingStatus.includes('Searching') ? 'text-blue-600 font-medium' : ''}>Search</span>
+                        <span className={loadingStatus.includes('Analyzing') ? 'text-blue-600 font-medium' : ''}>Analyze</span>
+                        <span className={loadingStatus.includes('Generating') ? 'text-blue-600 font-medium' : ''}>Generate</span>
+                        <span className={loadingStatus.includes('Finalizing') ? 'text-blue-600 font-medium' : ''}>Finalize</span>
+                      </div>
+                      <div className="flex space-x-1">
+                        <div className={`h-1 flex-1 rounded ${loadingStatus.includes('Searching') || loadingStatus.includes('Analyzing') || loadingStatus.includes('Generating') || loadingStatus.includes('Finalizing') ? 'bg-blue-600' : 'bg-blue-200'}`}></div>
+                        <div className={`h-1 flex-1 rounded ${loadingStatus.includes('Analyzing') || loadingStatus.includes('Generating') || loadingStatus.includes('Finalizing') ? 'bg-blue-600' : 'bg-blue-200'}`}></div>
+                        <div className={`h-1 flex-1 rounded ${loadingStatus.includes('Generating') || loadingStatus.includes('Finalizing') ? 'bg-blue-600' : 'bg-blue-200'}`}></div>
+                        <div className={`h-1 flex-1 rounded ${loadingStatus.includes('Finalizing') ? 'bg-blue-600' : 'bg-blue-200'}`}></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -299,11 +365,20 @@ export default function SearchInterface() {
                       </div>
                       <div className="mt-2 flex items-center justify-between">
                         {item.confidence && (
-                          <span className={cn("text-xs px-1.5 py-0.5 rounded font-medium", 
-                            item.confidence === 'high' ? 'bg-green-100 text-green-700' : 
-                            item.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' : 
-                            'bg-red-100 text-red-700'
-                          )}>
+                          <span 
+                            className={cn("text-xs px-1.5 py-0.5 rounded font-medium cursor-help transition-all duration-200", 
+                              item.confidence === 'high' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 
+                              item.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : 
+                              'bg-red-100 text-red-700 hover:bg-red-200'
+                            )}
+                            title={
+                              item.confidence === 'high' 
+                                ? 'High Confidence: Strong documentation match (>70% similarity)'
+                                : item.confidence === 'medium'
+                                ? 'Medium Confidence: Moderate match (>50% similarity)'
+                                : 'Low Confidence: Limited match (<50% similarity)'
+                            }
+                          >
                             {getConfidenceIcon(item.confidence)}
                           </span>
                         )}
@@ -363,12 +438,21 @@ export default function SearchInterface() {
               <div className="space-y-6">
                 {/* Modern Confidence Indicator */}
                 <div className="flex items-center justify-between">
-                  <div className={cn(
-                    "inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 shadow-sm",
-                    ragResponse.confidence === 'high' ? 'bg-green-50 border-green-200 text-green-800' :
-                    ragResponse.confidence === 'medium' ? 'bg-yellow-50 border-yellow-200 text-yellow-800' :
-                    'bg-red-50 border-red-200 text-red-800'
-                  )}>
+                  <div 
+                    className={cn(
+                      "inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 shadow-sm cursor-help transition-all duration-200 hover:shadow-md",
+                      ragResponse.confidence === 'high' ? 'bg-green-50 border-green-200 text-green-800 hover:bg-green-100' :
+                      ragResponse.confidence === 'medium' ? 'bg-yellow-50 border-yellow-200 text-yellow-800 hover:bg-yellow-100' :
+                      'bg-red-50 border-red-200 text-red-800 hover:bg-red-100'
+                    )}
+                    title={
+                      ragResponse.confidence === 'high' 
+                        ? 'High Confidence: Strong match found in documentation (>70% similarity). Answer based on highly relevant content.'
+                        : ragResponse.confidence === 'medium'
+                        ? 'Medium Confidence: Moderate match found (>50% similarity). Answer may require additional verification.'
+                        : 'Low Confidence: Limited matching content found (<50% similarity). Please verify information or rephrase your question.'
+                    }
+                  >
                     <span className="mr-2 text-lg">{getConfidenceIcon(ragResponse.confidence)}</span>
                     {ragResponse.confidence.toUpperCase()} CONFIDENCE
                   </div>
@@ -487,15 +571,15 @@ export default function SearchInterface() {
             <CardContent className="p-6">
               <div className="grid md:grid-cols-3 gap-3">
                 {[
-                  "How do I manage complaints in the Complaints module?",
-                  "How do I manage dog control cases?",
-                  "How do I record stray dog incidents?",
-                  "How do I link complaints to business premises?",
-                  "How do I investigate food safety complaints?",
-                  "How do I manage user permissions in the Admin module?",
-                  "How do I create and manage contacts?",
-                  "How do I view premises on the map?",
-                  "How do I record a food poisoning incident?"
+                  "How do I save search criteria?",
+                  "How do I create a new dog case record?",
+                  "How do I submit ideas to the Idox Ideas Portal?",
+                  "How do I search for contacts?",
+                  "How do I view dog records in the system?",
+                  "How do I investigate food poisoning incidents?",
+                  "How do I record food poisoning cases?",
+                  "How do I process online food business registrations?",
+                  "How do I search for dog records?"
                 ].map((example, index) => (
                   <button
                     key={index}

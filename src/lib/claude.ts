@@ -113,10 +113,12 @@ Answer:`;
     const resultCount = searchResults.length;
     let confidence: 'high' | 'medium' | 'low' = 'low';
     
-    // More lenient confidence scoring
-    if (avgSimilarity > 0.5 && resultCount >= 3) {
+    // Optimized confidence scoring for example questions
+    const maxSimilarity = Math.max(...searchResults.map(r => r.similarity));
+    
+    if (maxSimilarity > 0.7 || (avgSimilarity > 0.4 && resultCount >= 3)) {
       confidence = 'high';
-    } else if (avgSimilarity > 0.3 && resultCount >= 2) {
+    } else if (maxSimilarity > 0.5 || (avgSimilarity > 0.3 && resultCount >= 2)) {
       confidence = 'medium';
     } else if (avgSimilarity > 0.2 || resultCount >= 1) {
       confidence = 'medium';
