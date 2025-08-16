@@ -527,7 +527,10 @@ node scripts/quick-test.js
 - `/src/lib/utils.ts` - Utility functions for formatting and highlighting
 
 **Scripts:**
-- `/scripts/generate-embeddings.js` - Complete document processing pipeline
+- `/scripts/ingest-faq-documents.js` - FAQ document processing (Titan v2)
+- `/scripts/ingest-module-docs.js` - Module documentation processing (Titan v2)
+- `/scripts/test-rag-quality.js` - System quality assessment
+- `/scripts/fix-database.js` - Database schema management
 
 ## 📊 Performance & Monitoring
 

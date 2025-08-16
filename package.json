@@ -12,7 +12,9 @@
     "ingest": "node scripts/ingest-documents.js"
   },
   "dependencies": {
+    "@alloc/quick-lru": "^5.2.0",
     "@aws-sdk/client-bedrock-runtime": "^3.864.0",
+    "@aws-sdk/credential-provider-node": "^3.864.0",
     "@neondatabase/serverless": "^0.10.4",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.0",
