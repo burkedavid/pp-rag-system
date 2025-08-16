@@ -6,7 +6,7 @@ const { neon } = require('@neondatabase/serverless');
 
 // Configuration
 const USER_GUIDES_DIR = path.join(__dirname, '..', 'User Guide');
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_9eAE2FgWZURn@ep-falling-rice-abu5bomh-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+const DATABASE_URL = process.env.DATABASE_URL;
 
 const MAX_TOKENS = 800;
 

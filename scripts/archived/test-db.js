@@ -4,7 +4,7 @@ const querystring = require('querystring');
 
 // Simple HTTP client for Neon database
 async function testConnection() {
-  const dbUrl = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_9eAE2FgWZURn@ep-falling-rice-abu5bomh-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+  const dbUrl = process.env.DATABASE_URL;
   
   console.log('🔄 Testing database connection...');
   
