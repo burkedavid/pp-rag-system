@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/database';
+import { sql, hybridSearch } from '@/lib/database';
 import { generateRAGResponse } from '@/lib/claude';
 import { logAIUsage } from '@/lib/ai-audit';
 import { generateEmbedding } from '@/lib/embeddings';
@@ -89,8 +89,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Use pure vector search with Amazon Titan embeddings
-    const searchResults = await vectorSearch(query, limit);
+    // Use hybrid search combining semantic and keyword search
+    const queryEmbedding = await generateEmbedding(query);
+    const searchResults = await hybridSearch(queryEmbedding, query, limit);
     
     try {
       // Try to use Claude 4.0 for enhanced response generation
@@ -170,8 +171,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Use pure vector search with Amazon Titan embeddings
-    const searchResults = await vectorSearch(query, limit);
+    // Use hybrid search combining semantic and keyword search
+    const queryEmbedding = await generateEmbedding(query);
+    const searchResults = await hybridSearch(queryEmbedding, query, limit);
     
     try {
       // Try to use Claude 4.0 for enhanced response generation

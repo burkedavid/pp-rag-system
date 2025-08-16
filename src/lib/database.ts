@@ -35,7 +35,7 @@ export async function initializeDatabase() {
       chunk_text TEXT NOT NULL,
       chunk_index INTEGER NOT NULL,
       token_count INTEGER NOT NULL,
-      embedding VECTOR(1536),
+      embedding VECTOR(1024),
       metadata JSONB DEFAULT '{}',
       created_at TIMESTAMP DEFAULT NOW()
     );
@@ -79,7 +79,7 @@ export async function insertDocumentChunk(chunk: Omit<DocumentChunk, 'id' | 'cre
 export async function searchSimilarChunks(
   queryEmbedding: number[], 
   limit: number = 10,
-  threshold: number = 0.7
+  threshold: number = 0.3
 ): Promise<SearchResult[]> {
   const results = await sql`
     SELECT 
@@ -112,7 +112,7 @@ export async function hybridSearch(
         1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) as similarity,
         0.7 as weight
       FROM document_chunks
-      WHERE 1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) > 0.6
+      WHERE 1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) > 0.3
     ),
     keyword_search AS (
       SELECT 

@@ -487,15 +487,15 @@ export default function SearchInterface() {
             <CardContent className="p-6">
               <div className="grid md:grid-cols-3 gap-3">
                 {[
-                  "How to use the Inspections module for food safety inspections?",
-                  "How to navigate the Premises module and add new premises?",
-                  "How to process a license application in the Licensing module?",
-                  "How to create and manage service requests in the system?",
-                  "How to use the Complaints module for noise complaints?",
-                  "How to access the Admin module and manage user permissions?",
-                  "How to generate inspection reports from the system?",
-                  "How to link premises records with license applications?",
-                  "How to use the mobile functionality for field inspections?"
+                  "How do I manage complaints in the Complaints module?",
+                  "How do I manage dog control cases?",
+                  "How do I record stray dog incidents?",
+                  "How do I link complaints to business premises?",
+                  "How do I investigate food safety complaints?",
+                  "How do I manage user permissions in the Admin module?",
+                  "How do I create and manage contacts?",
+                  "How do I view premises on the map?",
+                  "How do I record a food poisoning incident?"
                 ].map((example, index) => (
                   <button
                     key={index}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/database';
+import { sql, hybridSearch } from '@/lib/database';
 import { generateEmbedding } from '@/lib/embeddings';
 
 async function vectorSearch(query: string, limit: number = 10) {
@@ -49,15 +49,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Use pure vector search with Amazon Titan embeddings
-    const results = await vectorSearch(query, limit);
-    const searchMode = 'semantic';
+    // Use hybrid search combining semantic and keyword search
+    const queryEmbedding = await generateEmbedding(query);
+    const results = await hybridSearch(queryEmbedding, query, limit);
+    const searchMode = 'hybrid';
 
     return NextResponse.json({
       results,
       query,
       count: results.length,
-      note: searchMode === 'semantic' ? 'Semantic search using Amazon Titan embeddings' : 'Keyword search fallback'
+      note: searchMode === 'hybrid' ? 'Hybrid search using Amazon Titan embeddings + keyword matching' : 'Semantic search using Amazon Titan embeddings'
     });
 
   } catch (error) {

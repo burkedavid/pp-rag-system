@@ -208,42 +208,222 @@ The system expertly handles questions about all aspects of public protection:
 }
 ```
 
-## 🚀 Adding New Documentation
+## 🚀 Documentation Management & Embedding Generation
 
-### Adding Individual Documents
+The system supports multiple types of documentation with specialized processing pipelines for optimal search results.
 
-1. **Place new markdown files** in the `/User Guide` directory
-2. **Run the embedding generation script:**
-   ```bash
-   node scripts/generate-embeddings.js
-   ```
-   The script will automatically detect and process new files while preserving existing embeddings.
+### 📁 Documentation Structure
 
-### Bulk Documentation Updates
+```
+/RAG Data/
+├── FAQs/                           # Frequently Asked Questions
+│   ├── 01-getting-started-faq.md
+│   ├── 02-premises-management-faq.md
+│   ├── 03-licences-guide-faq.md
+│   └── ... (15 FAQ files total)
+│
+└── Module Documentation/           # Detailed module guides
+    ├── Accidents_Module_Documentation.md
+    ├── Admin_Module_Documentation.md
+    ├── Complaints_Module_Documentation.md
+    └── ... (21 module files total)
+```
 
-1. **Replace or add multiple files** in `/User Guide`
-2. **Clear existing embeddings** (if doing a complete refresh):
-   ```sql
-   TRUNCATE TABLE document_chunks;
-   ```
-3. **Regenerate all embeddings:**
-   ```bash
-   node scripts/generate-embeddings.js
-   ```
+### 🔄 Adding New Documentation
 
-### Supported Document Formats
+#### 1. FAQ Documents
 
-- **Markdown (.md)** files with frontmatter
-- **Automatic parsing** of headers, lists, code blocks, and tables
-- **Intelligent chunking** preserves document structure and context
-- **Metadata extraction** for topic classification and search enhancement
+**File Location**: `/RAG Data/FAQs/`
+**Naming Convention**: `##-topic-name-faq.md` (e.g., `16-new-feature-faq.md`)
 
-### Document Processing Features
+```bash
+# Add new FAQ files to the FAQs directory
+cp new-feature-faq.md "/RAG Data/FAQs/16-new-feature-faq.md"
 
-- **Smart Chunking**: 800-token chunks with 100-token overlap for context preservation
-- **Topic Classification**: Automatic categorization (premises_management, inspections, licensing, etc.)
-- **Section Preservation**: Maintains document structure and headings
-- **Metadata Enhancement**: Adds file numbers, section types, and procedure detection
+# Process FAQ documents
+node scripts/ingest-faq-documents.js
+```
+
+**FAQ Processing Features:**
+- ✅ **Specialized FAQ parsing** with question-answer structure preservation
+- ✅ **Topic area classification** (premises_management, licensing, inspections, etc.)
+- ✅ **Procedure detection** for step-by-step guides
+- ✅ **File numbering** for organized priority and sequencing
+- ✅ **Windows line ending handling** for cross-platform compatibility
+
+#### 2. Module Documentation
+
+**File Location**: `/RAG Data/Module Documentation/`
+**Naming Convention**: `ModuleName_Module_Documentation.md`
+
+```bash
+# Add new module documentation
+cp new-module-guide.md "/RAG Data/Module Documentation/NewModule_Module_Documentation.md"
+
+# Process module documentation
+node scripts/ingest-module-docs.js
+```
+
+**Module Documentation Processing Features:**
+- ✅ **Module-specific categorization** (admin_module, complaints_module, etc.)
+- ✅ **Section type classification** (overview, workflow, feature, config, reporting)
+- ✅ **Comprehensive metadata** including subsection counts and procedure detection
+- ✅ **Integration-focused parsing** for complex system workflows
+
+#### 3. Legacy User Guide Documents (Deprecated)
+
+**Note**: The original `/User Guide` directory processing is deprecated in favor of the specialized FAQ and Module Documentation processing above.
+
+### 🛠️ Embedding Generation Scripts
+
+#### Complete System Setup
+
+```bash
+# Fix database schema (if needed)
+node scripts/fix-database.js
+
+# Process all FAQ documents (15 files → ~139 chunks)
+node scripts/ingest-faq-documents.js
+
+# Process all module documentation (21 files → ~799 chunks)
+node scripts/ingest-module-docs.js
+```
+
+#### Individual Processing
+
+```bash
+# Process only FAQ documents
+node scripts/ingest-faq-documents.js
+
+# Process only module documentation  
+node scripts/ingest-module-docs.js
+
+# Test system quality
+node scripts/test-rag-quality.js
+```
+
+### 📊 Processing Statistics
+
+| Document Type | Files | Chunks Generated | Processing Time |
+|---------------|-------|------------------|-----------------|
+| **FAQ Documents** | 15 | ~139 chunks | 2-3 minutes |
+| **Module Documentation** | 21 | ~799 chunks | 8-12 minutes |
+| **Total System** | 36 | ~938 chunks | 10-15 minutes |
+
+### 🔧 Advanced Processing Configuration
+
+#### Chunk Settings (Configurable in scripts)
+
+```javascript
+const BATCH_SIZE = 5;          // Embedding batch size
+const MAX_TOKENS = 800;        // Maximum tokens per chunk
+const OVERLAP_TOKENS = 100;    // Overlap between chunks
+```
+
+#### Topic Area Classification
+
+**FAQ Topics:**
+- `getting_started`, `premises_management`, `licensing`, `service_requests`
+- `notices`, `prosecutions`, `locations`, `grants`, `food_poisoning`
+- `accidents`, `animal_control`, `contacts`, `inspections`, `searches`
+
+**Module Topics:**
+- `accidents_module`, `admin_module`, `audit_module`, `bookings_module`
+- `complaints_module`, `contacts_module`, `dogs_module`, `food_poisoning_module`
+- `gis_module`, `grants_module`, `initiatives_module`, `inspections_module`
+- `licensing_module`, `locations_module`, `notices_module`, `premises_module`
+- `prosecutions_module`, `samples_module`, `service_requests_module`
+
+#### Section Type Classification
+
+**FAQ Sections:** `faq`, `workflow`, `quick_start`, `best_practices`, `troubleshooting`, `procedure`
+
+**Module Sections:** `module_overview`, `module_workflow`, `module_feature`, `module_config`, `module_reporting`, `module_integration`
+
+### 🧹 Database Management
+
+#### Clear Specific Document Types
+
+```bash
+# Clear only FAQ documents
+psql $DATABASE_URL -c "DELETE FROM document_chunks WHERE metadata->>'document_type' = 'faq';"
+
+# Clear only module documentation
+psql $DATABASE_URL -c "DELETE FROM document_chunks WHERE metadata->>'document_type' = 'module_documentation';"
+
+# Clear all documents
+node scripts/fix-database.js
+```
+
+#### Verify Processing
+
+```sql
+-- Check document counts by type
+SELECT 
+    metadata->>'document_type' as doc_type,
+    COUNT(*) as chunk_count
+FROM document_chunks 
+GROUP BY metadata->>'document_type';
+
+-- Check topic area distribution
+SELECT 
+    metadata->>'topic_area' as topic,
+    COUNT(*) as chunks
+FROM document_chunks 
+GROUP BY metadata->>'topic_area'
+ORDER BY chunks DESC;
+```
+
+### ⚡ Performance Optimizations
+
+#### Hybrid Search Implementation
+
+The system now uses **hybrid search** combining:
+- **Semantic search** (70% weight) - Amazon Titan v2 embeddings
+- **Keyword search** (30% weight) - PostgreSQL full-text search
+
+#### Vector Configuration
+
+```sql
+-- Optimized for 1024-dimensional Titan v2 vectors
+embedding VECTOR(1024)
+
+-- Similarity threshold lowered for better recall
+WHERE 1 - (embedding <=> query_vector) > 0.3
+```
+
+#### Confidence Scoring
+
+**Improved confidence calculation:**
+```javascript
+// More lenient scoring for better user experience
+if (avgSimilarity > 0.5 && resultCount >= 3) confidence = 'high';
+else if (avgSimilarity > 0.3 && resultCount >= 2) confidence = 'medium';
+else if (avgSimilarity > 0.2 || resultCount >= 1) confidence = 'medium';
+```
+
+### 🎯 Quality Assurance
+
+#### Testing Framework
+
+```bash
+# Run comprehensive quality assessment
+node scripts/test-rag-quality.js
+
+# Test specific questions for quality
+node scripts/quick-test.js
+
+# Find best-performing questions
+node scripts/find-best-questions.js
+```
+
+#### Quality Metrics
+
+- **Answer relevance** - Checks for topic coverage
+- **Confidence levels** - Monitors AI certainty
+- **Source count** - Ensures comprehensive context
+- **Response length** - Validates detailed answers
+- **Software specificity** - Confirms practical guidance
 
 ## 🎨 Modern Interface Features
 

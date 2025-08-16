@@ -31,29 +31,21 @@ ${result.chunk_text}
 `)
     .join('\n\n');
 
-  const prompt = `You are a SOFTWARE HELP SYSTEM for the Idox Public Protection System. Your ONLY purpose is to provide step-by-step instructions for using the Idox software interface.
+  const prompt = `You are an EXPERT ASSISTANT for the Idox Public Protection System software. Your role is to provide comprehensive, accurate, and helpful guidance for using this software system effectively.
 
-**CRITICAL: You MUST ONLY provide software instructions. Do NOT provide:**
-- General regulatory advice or legal guidance
-- Policy recommendations or interpretations
-- Best practices beyond software usage
-- Theoretical explanations of regulations
-- General business process advice
-
-The Idox Public Protection System is software used by local authorities. Users need to know HOW TO USE the software features, buttons, menus, forms, and workflows.
-
-Context from the software user guides:
+Context from the software documentation:
 ${context}
 
 User Question: ${query}
 
-**SOFTWARE-ONLY RESPONSE REQUIREMENTS:**
-1. **Answer ONLY with software instructions** - how to navigate, click, enter data, save, etc.
-2. **Use exact Idox interface elements** - actual button names, menu paths, field labels, tab names
-3. **Include specific navigation paths** - "Click \`Module\` > \`Menu Item\` > \`Action\`"
-4. **Reference only software features** - modules, screens, forms, reports, integrations
-5. **If no software instructions exist in the context**, clearly state: "The user guides don't contain specific software instructions for this task"
-6. **Focus on the Idox system interface** - not regulatory processes or theory
+**RESPONSE REQUIREMENTS:**
+1. **Provide detailed software instructions** when the documentation contains specific steps, procedures, or workflows
+2. **Use exact interface elements** from the documentation - button names, menu paths, field labels, module names
+3. **Include step-by-step procedures** when available - "Navigate to Module > Menu Item > Action"
+4. **Reference software features** described in the documentation - modules, screens, forms, reports, workflows
+5. **If procedures are available**, format them clearly with numbered steps and proper navigation paths
+6. **Draw from ALL available information** in the context to provide the most complete answer possible
+7. **If specific instructions aren't available**, provide what information IS available and suggest where to find more details
 
 **FORMATTING REQUIREMENTS:**
 1. **Use Clear Headers**: Start with ## Software Task, use ### for interface sections
@@ -116,13 +108,17 @@ Answer:`;
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
     const answer = responseBody.content[0].text;
 
-    // Determine confidence based on search result similarities
+    // Determine confidence based on search result similarities and count
     const avgSimilarity = searchResults.reduce((sum, result) => sum + result.similarity, 0) / searchResults.length;
+    const resultCount = searchResults.length;
     let confidence: 'high' | 'medium' | 'low' = 'low';
     
-    if (avgSimilarity > 0.8) {
+    // More lenient confidence scoring
+    if (avgSimilarity > 0.5 && resultCount >= 3) {
       confidence = 'high';
-    } else if (avgSimilarity > 0.65) {
+    } else if (avgSimilarity > 0.3 && resultCount >= 2) {
+      confidence = 'medium';
+    } else if (avgSimilarity > 0.2 || resultCount >= 1) {
       confidence = 'medium';
     }
 
