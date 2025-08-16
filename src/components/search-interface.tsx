@@ -134,7 +134,6 @@ export default function SearchInterface() {
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    console.log('Example question clicked:', suggestion);
     setQuery(suggestion);
     setShowSuggestions(false);
     handleSearch(suggestion);
@@ -145,7 +144,6 @@ export default function SearchInterface() {
     handleSearch(historyQuery);
   };
 
-  // Highlighting will be handled within ReactMarkdown components
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -163,9 +161,9 @@ export default function SearchInterface() {
               <div className="h-1 w-24 bg-blue-300 mx-auto rounded-full shadow-lg"></div>
             </div>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed font-light">
-              AI-powered search through official Idox Public Protection System user guides. 
-              Get step-by-step software instructions for using Environmental Health, Trading Standards, 
-              Licensing, Housing, and regulatory management features.
+              Intelligent AI-powered search through Environmental Health, Trading Standards, 
+              Licensing, Housing, and regulatory documentation. Get instant, accurate answers 
+              from official Idox system guidance.
             </p>
             <div className="inline-flex items-center px-4 py-2 bg-blue-600/30 backdrop-blur-sm rounded-full border border-blue-400/30">
               <span className="text-blue-100 text-sm font-medium">Powered by Idox System Documentation</span>
@@ -182,7 +180,7 @@ export default function SearchInterface() {
             <div className="space-y-6">
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-semibold text-slate-800">Ask Your Question</h2>
-                <p className="text-slate-600">Search through Idox software user guides for step-by-step instructions and workflows</p>
+                <p className="text-slate-600">Search through comprehensive regulatory documentation with AI-powered intelligence</p>
               </div>
               
               <div className="relative">
@@ -193,7 +191,7 @@ export default function SearchInterface() {
                     </div>
                     <Input
                       type="text"
-                      placeholder="Ask how to use Idox features: create premises, manage inspections, process applications..."
+                      placeholder="Ask about food inspections, licensing procedures, enforcement actions..."
                       value={query}
                       onChange={(e) => {
                         setQuery(e.target.value);
@@ -343,24 +341,9 @@ export default function SearchInterface() {
 
                 {/* Enhanced Answer Display */}
                 <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-6 border border-blue-100">
-                  <div className="prose prose-lg max-w-none text-slate-800 leading-relaxed [&>p]:mb-4 [&>ul]:my-4 [&>ol]:my-4">
-                    <ReactMarkdown 
-                      components={{
-                        h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-blue-900 mb-4 border-b-2 border-blue-200 pb-2" {...props} />,
-                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-blue-800 mt-6 mb-3 border-b border-blue-200 pb-1" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-blue-700 mt-5 mb-2" {...props} />,
-                        h4: ({node, ...props}) => <h4 className="text-base font-semibold text-slate-700 mt-4 mb-2" {...props} />,
-                        p: ({node, ...props}) => <p className="mb-3 leading-relaxed text-slate-700" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc list-inside mb-4 space-y-1 ml-4" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-4 space-y-1 ml-4" {...props} />,
-                        li: ({node, ...props}) => <li className="mb-1 text-slate-700" {...props} />,
-                        strong: ({node, ...props}) => <strong className="font-semibold text-slate-900" {...props} />,
-                        em: ({node, ...props}) => <em className="italic text-slate-600" {...props} />,
-                        code: ({node, ...props}) => <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-mono border border-blue-200" {...props} />,
-                        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-300 pl-4 py-2 bg-blue-50 rounded-r text-slate-700 my-4" {...props} />
-                      }}
-                    >
-                      {ragResponse?.answer || ''}
+                  <div className="prose prose-lg max-w-none text-slate-800 leading-relaxed">
+                    <ReactMarkdown>
+                      {ragResponse.answer}
                     </ReactMarkdown>
                   </div>
                 </div>
@@ -420,7 +403,7 @@ export default function SearchInterface() {
                           </h3>
                           <div className="flex items-center gap-2">
                             <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-medium">
-                              {result.metadata.topic_area.replace('_', ' ').toUpperCase()}
+                              {result.metadata?.topic_area?.replace('_', ' ').toUpperCase() || 'GENERAL'}
                             </span>
                             <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
                               {Math.round(result.similarity * 100)}% match
@@ -459,25 +442,22 @@ export default function SearchInterface() {
             <CardHeader className="pb-6">
               <div className="space-y-2">
                 <CardTitle className="text-2xl font-bold text-slate-800">Example Questions</CardTitle>
-                <p className="text-slate-600">Get started with these common software usage questions</p>
+                <p className="text-slate-600">Get started with these common regulatory queries</p>
               </div>
             </CardHeader>
             <CardContent className="p-8">
               <div className="grid md:grid-cols-2 gap-4">
                 {[
-                  "How do I process online food business registrations in the system?",
-                  "How do I link complaints to existing premises in the system?",
-                  "How do I close a complaint case properly?",
-                  "How do I conduct complaint investigations effectively?",
-                  "How do I determine complaint urgency and response timelines?",
-                  "How do I link complaints to inspections or enforcement cases?"
+                  "How do I process a new food business registration?",
+                  "What are the steps for a routine food safety inspection?",
+                  "How do I handle a noise complaint?",
+                  "What documents are needed for an alcohol license application?",
+                  "How do I issue an improvement notice?",
+                  "What is the process for investigating food poisoning?"
                 ].map((example, index) => (
                   <button
                     key={index}
-                    onClick={() => {
-                      console.log('Button clicked:', example);
-                      handleSuggestionClick(example);
-                    }}
+                    onClick={() => handleSuggestionClick(example)}
                     className="group text-left p-6 rounded-2xl border-2 border-blue-200 hover:border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-150 transition-all duration-200 shadow-sm hover:shadow-lg"
                   >
                     <div className="text-slate-700 font-medium leading-relaxed group-hover:text-blue-800 transition-colors">
@@ -501,7 +481,7 @@ export default function SearchInterface() {
               © 2024 Idox Public Protection Knowledge Base. Powered by Claude 4.0 and Amazon Titan v2.
             </p>
             <p className="text-xs">
-              All responses are generated from official Idox user guides. For the latest software features, consult your system administrator.
+              All responses are generated from official documentation. Please verify critical information with current regulations.
             </p>
           </div>
         </div>

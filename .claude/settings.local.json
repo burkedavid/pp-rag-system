@@ -13,7 +13,20 @@
       "Bash(npm run build:*)",
       "Bash(grep:*)",
       "Bash(npx tsc:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(npm run lint)",
+      "Bash(npm update:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(mv:*)",
+      "Bash(export PATH=\"$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH\")",
+      "Bash(yarn --version)",
+      "Bash(yarn install)",
+      "Bash(pkill:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:live.hornbill.com)",
+      "Bash(sed:*)",
+      "Bash(npx next:*)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []
