@@ -35,12 +35,16 @@
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
+    "@types/hast": "^3.0.4",
     "@types/marked": "^6.0.0",
+    "@types/mdast": "^4.0.4",
+    "@types/ms": "^2.1.0",
     "@types/node": "20.19.11",
     "@types/pg": "^8.11.10",
     "@types/prop-types": "^15.7.15",
     "@types/react": "18.3.23",
     "@types/react-dom": "^18.3.5",
+    "@types/unist": "^3.0.3",
     "eslint": "^8.57.1",
     "eslint-config-next": "15.4.6",
     "postcss": "^8.5.1",

@@ -464,7 +464,6 @@ export default function SearchInterface() {
                 {/* Enhanced Answer Display */}
                 <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-6 border border-blue-100">
                   <div className="prose prose-lg max-w-none text-slate-800 leading-relaxed">
-                    {console.log('Rendering answer:', ragResponse.answer)}
                     <ReactMarkdown>
                       {ragResponse.answer}
                     </ReactMarkdown>
