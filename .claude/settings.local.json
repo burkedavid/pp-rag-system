@@ -26,7 +26,8 @@
       "WebFetch(domain:live.hornbill.com)",
       "Bash(sed:*)",
       "Bash(npx next:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
