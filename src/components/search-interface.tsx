@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Search, Loader2, FileText, ExternalLink, Clock, Home, Utensils, Dog, Users, Shield, AlertTriangle, Gavel, Building2, Star } from 'lucide-react';
+import { Search, Loader2, FileText, ExternalLink, Clock, Home, Utensils, Dog, Users, Shield, AlertTriangle, Gavel, Building2, Star, Scale, MapPin, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -565,7 +565,7 @@ export default function SearchInterface() {
             <CardHeader className="pb-4">
               <div className="space-y-3">
                 <CardTitle className="text-2xl font-bold text-slate-800">Explore by Module</CardTitle>
-                <p className="text-slate-600">High-confidence questions across all Idox Public Protection modules</p>
+                <p className="text-slate-600">Example questions to get you started with Idox Public Protection system functionality</p>
               </div>
             </CardHeader>
             <CardContent className="p-6">
@@ -574,10 +574,14 @@ export default function SearchInterface() {
                 <div className="flex flex-wrap gap-2 bg-slate-50 p-2 rounded-xl">
                   {[
                     { id: 'food-safety', label: 'Food Safety', icon: Utensils, color: 'text-green-600', count: 5 },
-                    { id: 'dogs-animals', label: 'Dogs & Animals', icon: Dog, color: 'text-amber-600', count: 4 },
+                    { id: 'dogs-animals', label: 'Dogs', icon: Dog, color: 'text-amber-600', count: 4 },
+                    { id: 'service-requests', label: 'Service Requests', icon: ClipboardList, color: 'text-indigo-600', count: 4 },
                     { id: 'system-search', label: 'System & Search', icon: Search, color: 'text-blue-600', count: 4 },
                     { id: 'enforcement', label: 'Enforcement', icon: Shield, color: 'text-red-600', count: 3 },
                     { id: 'inspections', label: 'Inspections', icon: AlertTriangle, color: 'text-orange-600', count: 3 },
+                    { id: 'premises', label: 'Premises', icon: Building2, color: 'text-teal-600', count: 3 },
+                    { id: 'prosecutions', label: 'Prosecutions', icon: Scale, color: 'text-slate-600', count: 3 },
+                    { id: 'licensing', label: 'Licensing', icon: Gavel, color: 'text-cyan-600', count: 3 },
                     { id: 'contacts', label: 'Contacts', icon: Users, color: 'text-purple-600', count: 2 }
                   ].map((module) => (
                     <button
@@ -606,29 +610,25 @@ export default function SearchInterface() {
                     <div className="flex items-center gap-2 mb-4">
                       <Utensils className="h-5 w-5 text-green-600" />
                       <h3 className="text-lg font-semibold text-slate-800">Food Safety & Premises</h3>
-                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">High Confidence</span>
+                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        { q: "How do I investigate food poisoning incidents?", conf: "99%" },
-                        { q: "How do I record food poisoning cases?", conf: "95%" },
-                        { q: "How do I process online food business registrations?", conf: "92%" },
-                        { q: "How do I create a premises record?", conf: "88%" },
-                        { q: "How do I register a new food business?", conf: "85%" }
-                      ].map((item, index) => (
+                        "How do I investigate food poisoning incidents?",
+                        "How do I record food poisoning cases?",
+                        "How do I process online food business registrations?",
+                        "How do I create a premises record?",
+                        "How do I register a new food business?"
+                      ].map((question, index) => (
                         <button
                           key={index}
-                          onClick={() => handleSuggestionClick(item.q)}
+                          onClick={() => handleSuggestionClick(question)}
                           className="group text-left p-3 rounded-lg border border-green-200 hover:border-green-400 bg-gradient-to-br from-green-50 to-green-100/50 hover:from-green-100 hover:to-green-150 transition-all duration-200 shadow-sm hover:shadow-md"
                         >
                           <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-green-800 transition-colors mb-2">
-                            {item.q}
+                            {question}
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-green-600 font-medium flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-current" />
-                              {item.conf}
-                            </span>
+                          <div className="flex items-center justify-end">
                             <ExternalLink className="h-3 w-3 text-green-600 opacity-50 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </button>
@@ -642,30 +642,58 @@ export default function SearchInterface() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 mb-4">
                       <Dog className="h-5 w-5 text-amber-600" />
-                      <h3 className="text-lg font-semibold text-slate-800">Dogs & Animal Control</h3>
-                      <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">High Confidence</span>
+                      <h3 className="text-lg font-semibold text-slate-800">Dogs</h3>
+                      <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        { q: "How do I create a new dog case record?", conf: "99%" },
-                        { q: "How do I view dog records in the system?", conf: "93%" },
-                        { q: "How do I search for dog records?", conf: "89%" },
-                        { q: "How do I create a dangerous dog report?", conf: "78%" }
-                      ].map((item, index) => (
+                        "How do I create a new dog case record?",
+                        "How do I view dog records in the system?",
+                        "How do I search for dog records?",
+                        "How do I create a dangerous dog report?"
+                      ].map((question, index) => (
                         <button
                           key={index}
-                          onClick={() => handleSuggestionClick(item.q)}
+                          onClick={() => handleSuggestionClick(question)}
                           className="group text-left p-3 rounded-lg border border-amber-200 hover:border-amber-400 bg-gradient-to-br from-amber-50 to-amber-100/50 hover:from-amber-100 hover:to-amber-150 transition-all duration-200 shadow-sm hover:shadow-md"
                         >
                           <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-amber-800 transition-colors mb-2">
-                            {item.q}
+                            {question}
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-amber-600 font-medium flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-current" />
-                              {item.conf}
-                            </span>
+                          <div className="flex items-center justify-end">
                             <ExternalLink className="h-3 w-3 text-amber-600 opacity-50 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Service Requests */}
+                {activeModule === 'service-requests' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-4">
+                      <ClipboardList className="h-5 w-5 text-indigo-600" />
+                      <h3 className="text-lg font-semibold text-slate-800">Service Requests</h3>
+                      <span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {[
+                        "How do I create a service request?",
+                        "How do I assign service requests to officers?",
+                        "How do I track service request progress?",
+                        "How do I prioritize service requests?"
+                      ].map((question, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(question)}
+                          className="group text-left p-3 rounded-lg border border-indigo-200 hover:border-indigo-400 bg-gradient-to-br from-indigo-50 to-indigo-100/50 hover:from-indigo-100 hover:to-indigo-150 transition-all duration-200 shadow-sm hover:shadow-md"
+                        >
+                          <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-indigo-800 transition-colors mb-2">
+                            {question}
+                          </div>
+                          <div className="flex items-center justify-end">
+                            <ExternalLink className="h-3 w-3 text-indigo-600 opacity-50 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </button>
                       ))}
@@ -679,28 +707,24 @@ export default function SearchInterface() {
                     <div className="flex items-center gap-2 mb-4">
                       <Search className="h-5 w-5 text-blue-600" />
                       <h3 className="text-lg font-semibold text-slate-800">System & Search Functions</h3>
-                      <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">High Confidence</span>
+                      <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        { q: "How do I save search criteria?", conf: "93%" },
-                        { q: "How do I search for contacts?", conf: "91%" },
-                        { q: "How do I submit ideas to the Idox Ideas Portal?", conf: "89%" },
-                        { q: "How do I merge duplicate contacts?", conf: "76%" }
-                      ].map((item, index) => (
+                        "How do I save search criteria?",
+                        "How do I search for contacts?",
+                        "How do I submit ideas to the Idox Ideas Portal?",
+                        "How do I merge duplicate contacts?"
+                      ].map((question, index) => (
                         <button
                           key={index}
-                          onClick={() => handleSuggestionClick(item.q)}
+                          onClick={() => handleSuggestionClick(question)}
                           className="group text-left p-3 rounded-lg border border-blue-200 hover:border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-150 transition-all duration-200 shadow-sm hover:shadow-md"
                         >
                           <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-blue-800 transition-colors mb-2">
-                            {item.q}
+                            {question}
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-blue-600 font-medium flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-current" />
-                              {item.conf}
-                            </span>
+                          <div className="flex items-center justify-end">
                             <ExternalLink className="h-3 w-3 text-blue-600 opacity-50 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </button>
@@ -715,27 +739,23 @@ export default function SearchInterface() {
                     <div className="flex items-center gap-2 mb-4">
                       <Shield className="h-5 w-5 text-red-600" />
                       <h3 className="text-lg font-semibold text-slate-800">Enforcement & Compliance</h3>
-                      <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">High Confidence</span>
+                      <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        { q: "How do I log a noise complaint?", conf: "86%" },
-                        { q: "How do I start enforcement action?", conf: "74%" },
-                        { q: "How do I issue an improvement notice?", conf: "72%" }
-                      ].map((item, index) => (
+                        "How do I log a noise complaint?",
+                        "How do I start enforcement action?",
+                        "How do I issue an improvement notice?"
+                      ].map((question, index) => (
                         <button
                           key={index}
-                          onClick={() => handleSuggestionClick(item.q)}
+                          onClick={() => handleSuggestionClick(question)}
                           className="group text-left p-3 rounded-lg border border-red-200 hover:border-red-400 bg-gradient-to-br from-red-50 to-red-100/50 hover:from-red-100 hover:to-red-150 transition-all duration-200 shadow-sm hover:shadow-md"
                         >
                           <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-red-800 transition-colors mb-2">
-                            {item.q}
+                            {question}
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-red-600 font-medium flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-current" />
-                              {item.conf}
-                            </span>
+                          <div className="flex items-center justify-end">
                             <ExternalLink className="h-3 w-3 text-red-600 opacity-50 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </button>
@@ -750,28 +770,117 @@ export default function SearchInterface() {
                     <div className="flex items-center gap-2 mb-4">
                       <AlertTriangle className="h-5 w-5 text-orange-600" />
                       <h3 className="text-lg font-semibold text-slate-800">Inspections & Sampling</h3>
-                      <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full">High Confidence</span>
+                      <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        { q: "How do I collect food samples?", conf: "78%" },
-                        { q: "How do I conduct a health and safety inspection?", conf: "73%" },
-                        { q: "How do I prepare a prosecution case?", conf: "71%" }
-                      ].map((item, index) => (
+                        "How do I collect food samples?",
+                        "How do I conduct a health and safety inspection?",
+                        "How do I prepare a prosecution case?"
+                      ].map((question, index) => (
                         <button
                           key={index}
-                          onClick={() => handleSuggestionClick(item.q)}
+                          onClick={() => handleSuggestionClick(question)}
                           className="group text-left p-3 rounded-lg border border-orange-200 hover:border-orange-400 bg-gradient-to-br from-orange-50 to-orange-100/50 hover:from-orange-100 hover:to-orange-150 transition-all duration-200 shadow-sm hover:shadow-md"
                         >
                           <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-orange-800 transition-colors mb-2">
-                            {item.q}
+                            {question}
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-orange-600 font-medium flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-current" />
-                              {item.conf}
-                            </span>
+                          <div className="flex items-center justify-end">
                             <ExternalLink className="h-3 w-3 text-orange-600 opacity-50 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Premises Management */}
+                {activeModule === 'premises' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Building2 className="h-5 w-5 text-teal-600" />
+                      <h3 className="text-lg font-semibold text-slate-800">Premises Management</h3>
+                      <span className="bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {[
+                        "How do I link contacts to premises?",
+                        "How do I search for premises records?",
+                        "How do I add a new premises to the system?"
+                      ].map((question, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(question)}
+                          className="group text-left p-3 rounded-lg border border-teal-200 hover:border-teal-400 bg-gradient-to-br from-teal-50 to-teal-100/50 hover:from-teal-100 hover:to-teal-150 transition-all duration-200 shadow-sm hover:shadow-md"
+                        >
+                          <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-teal-800 transition-colors mb-2">
+                            {question}
+                          </div>
+                          <div className="flex items-center justify-end">
+                            <ExternalLink className="h-3 w-3 text-teal-600 opacity-50 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Prosecutions */}
+                {activeModule === 'prosecutions' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Scale className="h-5 w-5 text-slate-600" />
+                      <h3 className="text-lg font-semibold text-slate-800">Prosecutions & Legal</h3>
+                      <span className="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {[
+                        "How do I initiate prosecution proceedings?",
+                        "How do I track prosecution status?",
+                        "How do I prepare court documentation?"
+                      ].map((question, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(question)}
+                          className="group text-left p-3 rounded-lg border border-slate-200 hover:border-slate-400 bg-gradient-to-br from-slate-50 to-slate-100/50 hover:from-slate-100 hover:to-slate-150 transition-all duration-200 shadow-sm hover:shadow-md"
+                        >
+                          <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-slate-800 transition-colors mb-2">
+                            {question}
+                          </div>
+                          <div className="flex items-center justify-end">
+                            <ExternalLink className="h-3 w-3 text-slate-600 opacity-50 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Licensing */}
+                {activeModule === 'licensing' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Gavel className="h-5 w-5 text-cyan-600" />
+                      <h3 className="text-lg font-semibold text-slate-800">Licensing & Permits</h3>
+                      <span className="bg-cyan-100 text-cyan-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {[
+                        "How do I process a license application?",
+                        "How do I apply for a premises license?",
+                        "How do I conduct a license review?"
+                      ].map((question, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(question)}
+                          className="group text-left p-3 rounded-lg border border-cyan-200 hover:border-cyan-400 bg-gradient-to-br from-cyan-50 to-cyan-100/50 hover:from-cyan-100 hover:to-cyan-150 transition-all duration-200 shadow-sm hover:shadow-md"
+                        >
+                          <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-cyan-800 transition-colors mb-2">
+                            {question}
+                          </div>
+                          <div className="flex items-center justify-end">
+                            <ExternalLink className="h-3 w-3 text-cyan-600 opacity-50 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </button>
                       ))}
@@ -785,26 +894,22 @@ export default function SearchInterface() {
                     <div className="flex items-center gap-2 mb-4">
                       <Users className="h-5 w-5 text-purple-600" />
                       <h3 className="text-lg font-semibold text-slate-800">Contacts & Communications</h3>
-                      <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">High Confidence</span>
+                      <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        { q: "How do I search for contacts?", conf: "91%" },
-                        { q: "How do I merge duplicate contacts?", conf: "76%" }
-                      ].map((item, index) => (
+                        "How do I search for contacts?",
+                        "How do I merge duplicate contacts?"
+                      ].map((question, index) => (
                         <button
                           key={index}
-                          onClick={() => handleSuggestionClick(item.q)}
+                          onClick={() => handleSuggestionClick(question)}
                           className="group text-left p-3 rounded-lg border border-purple-200 hover:border-purple-400 bg-gradient-to-br from-purple-50 to-purple-100/50 hover:from-purple-100 hover:to-purple-150 transition-all duration-200 shadow-sm hover:shadow-md"
                         >
                           <div className="text-sm text-slate-700 font-medium leading-tight group-hover:text-purple-800 transition-colors mb-2">
-                            {item.q}
+                            {question}
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-purple-600 font-medium flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-current" />
-                              {item.conf}
-                            </span>
+                          <div className="flex items-center justify-end">
                             <ExternalLink className="h-3 w-3 text-purple-600 opacity-50 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </button>
@@ -813,29 +918,6 @@ export default function SearchInterface() {
                   </div>
                 )}
 
-                {/* Module Summary Stats */}
-                <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                  <div className="text-center space-y-2">
-                    <h4 className="text-lg font-semibold text-slate-800">Complete System Coverage</h4>
-                    <p className="text-sm text-slate-600">
-                      21 high-confidence questions across 6 core modules • 938 document chunks • 75%+ accuracy
-                    </p>
-                    <div className="flex items-center justify-center gap-6 mt-3">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">21</div>
-                        <div className="text-xs text-slate-500">Questions</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">6</div>
-                        <div className="text-xs text-slate-500">Modules</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">938</div>
-                        <div className="text-xs text-slate-500">Documents</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
