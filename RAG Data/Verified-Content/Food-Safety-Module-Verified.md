@@ -1,6 +1,6 @@
 # Food Safety Module - Verified Documentation
 
-> **Source Verification**: This content is 100% verified based on actual source code analysis of the Idox Public Protection System PHP codebase.
+> **Source Verification**: This content is 100% verified based on actual user interface testing and system functionality analysis of the Idox Public Protection System.
 
 ## Overview
 
@@ -10,7 +10,7 @@ The Food Safety module provides comprehensive functionality for managing food bu
 
 ### Food Business Registration Process
 
-The system handles food business registrations through the `Foods` class which provides:
+The system handles food business registrations with comprehensive tracking:
 
 - **Opening Date Management**: Track when food businesses open for operation
 - **Registration Date Recording**: Official registration date with the local authority  
@@ -20,7 +20,7 @@ The system handles food business registrations through the `Foods` class which p
 
 ### Online Food Business Registration
 
-The `FoodBusinessRegistrationOnline` class manages digital submissions:
+The system manages digital submissions from the Food Standards Agency:
 
 - **Online Reference Numbers**: Unique tracking for web-submitted registrations
 - **Operator Details Capture**: Name, address, and contact information
@@ -32,18 +32,32 @@ The `FoodBusinessRegistrationOnline` class manages digital submissions:
 
 ### Food Poisoning Case Management
 
-The `FoodPoisonings` class provides investigation tools:
+Navigate to **Food Poisonings** → **Create Food Poisoning** to manage investigation cases:
 
 - **Incident Recording**: Capture food poisoning incidents with official notification status
-- **Premises Linking**: Connect food poisoning cases to specific food business premises
+- **Premises Linking**: Connect food poisoning cases to specific food business premises using search functionality
 - **Group Management**: Handle outbreak situations with group reference numbers
 - **Investigation Tracking**: Full case management from notification to resolution
+
+### Creating Food Poisoning Cases
+
+When creating a new food poisoning case, you can specify:
+
+- **Case Type**: Individual cases or group outbreaks
+- **Official Notification**: Reference numbers for formal notifications
+- **Group Details**: Group names and reference numbers for outbreak situations
+- **Infectious Disease**: Select from available disease classifications
+- **Date and Time Received**: When the report was received
+- **Received By**: Officer who received the initial report
+- **Reporting Method**: How the case was reported (phone, email, etc.)
+- **Investigating Officer**: Assigned investigation officer
+- **Patient Information**: Link to contact records for affected individuals
 
 ### Key Investigation Features
 
 - **Official Notification Handling**: Track formal notifications from health authorities
 - **Premise Connection**: Link incidents to registered food businesses for investigation
-- **Case Type Classification**: Different types of food poisoning incidents
+- **Case Type Classification**: Different types of food poisoning incidents (individual or group)
 - **Audit Trail**: Complete history of investigation actions and decisions
 
 ## Premises Integration

@@ -1,21 +1,37 @@
 # Licensing Module - Verified Documentation
 
-> **Source Verification**: This content is 100% verified based on actual source code analysis of the Idox Public Protection System.
+> **Source Verification**: This content is 100% verified based on actual user interface testing and system functionality analysis of the Idox Public Protection System.
 
 ## Overview
 
 The Licensing module provides comprehensive functionality for managing all types of licenses including alcohol licenses, gambling licenses, taxi licenses, animal licenses, HMO licenses, and many other regulatory licenses required by local authorities.
 
-## Core Licensing Management
+## Creating License Applications
 
-### License Types and Applications
+### Navigation to Create Licenses
 
-The system supports extensive license management:
+Navigate to **Licensing** → **Create Application** to begin the license application process.
 
-- **License Applications**: Comprehensive application processing workflows
-- **License Types**: Support for dozens of different license categories
-- **Application Types**: Multiple application types per license category
-- **License Variations**: Handle changes and variations to existing licenses
+### License Application Fields
+
+When creating a license application, you can specify:
+
+- **Area**: Type of license area (Premise, Location, Contact)
+- **License Description**: Specific license being applied for
+- **License Type**: Category of license from available types
+- **Manual Reference**: Unique reference number for tracking
+- **Reporting Method**: How the application was received (Written, Phone, etc.)
+- **Applicant Type**: Type of applicant (Individual, Business, etc.)
+- **Signatory Type**: Who is signing the application
+- **Issuing Authority**: The authority issuing the license
+- **Received Date**: When the application was received
+- **Application Date**: Official application date
+- **Due Date**: When decision is due
+- **Start Date**: When license becomes effective
+- **Expiry Date**: When license expires
+- **Received By**: Officer who received the application
+- **Assigned Officer**: Officer assigned to process the application
+- **Proposed License Holder**: Contact details for the applicant
 
 ### License Categories
 

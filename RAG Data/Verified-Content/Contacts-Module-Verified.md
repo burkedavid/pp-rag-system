@@ -1,25 +1,32 @@
 # Contacts Module - Verified Documentation
 
-> **Source Verification**: This content is 100% verified based on actual source code analysis of the Idox Public Protection System.
+> **Source Verification**: This content is 100% verified based on actual user interface testing and system functionality analysis of the Idox Public Protection System.
 
 ## Overview
 
 The Contacts module provides comprehensive functionality for managing all types of contacts including business operators, property owners, complainants, witnesses, and other individuals or organizations involved in regulatory activities.
 
-## Core Contact Management
+## Creating Contact Records
 
-### Contact Records
+### Navigation to Create Contacts
 
-Comprehensive contact information management:
+Navigate to **Contacts** → **Create Contact** to add new contact records to the system.
 
-- **Personal Details**: Names, titles, and personal information
-- **Business Information**: Company names, positions, and business roles
-- **Address Management**: Multiple addresses per contact with address history
-- **Communication Preferences**: Phone, email, and correspondence preferences
+### Contact Information Fields
+
+When creating a contact, you can specify:
+
+- **Title**: Select from available title options (including "(none)" option)
+- **Personal Details**: First name, middle name, and surname
+- **Contact Types**: Multiple contact type classifications (Owner, Landlord, etc.)
+- **Company Name**: Business or organization name
+- **Address Information**: Complete address details including house number, street, locality, town, county, and postcode
+- **Communication Details**: Telephone, mobile, and email address
+- **Reference**: Unique contact reference for system tracking
 
 ### Contact Types
 
-Flexible contact categorization:
+Flexible contact categorization system allows multiple types per contact:
 
 - **Individual Contacts**: Private individuals and sole traders
 - **Business Contacts**: Companies, partnerships, and organizations

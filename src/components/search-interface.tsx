@@ -622,16 +622,16 @@ export default function SearchInterface() {
               <div className="mb-6">
                 <div className="flex flex-wrap gap-2 bg-slate-50 p-2 rounded-xl">
                   {[
-                    { id: 'food-safety', label: 'Food Safety', icon: Utensils, color: 'text-green-600', count: 5 },
-                    { id: 'dogs-animals', label: 'Dogs', icon: Dog, color: 'text-amber-600', count: 4 },
-                    { id: 'service-requests', label: 'Service Requests', icon: ClipboardList, color: 'text-indigo-600', count: 4 },
-                    { id: 'system-search', label: 'System & Search', icon: Search, color: 'text-blue-600', count: 4 },
-                    { id: 'enforcement', label: 'Enforcement', icon: Shield, color: 'text-red-600', count: 3 },
-                    { id: 'inspections', label: 'Inspections', icon: AlertTriangle, color: 'text-orange-600', count: 3 },
-                    { id: 'premises', label: 'Premises', icon: Building2, color: 'text-teal-600', count: 3 },
-                    { id: 'prosecutions', label: 'Prosecutions', icon: Scale, color: 'text-slate-600', count: 3 },
-                    { id: 'licensing', label: 'Licensing', icon: Gavel, color: 'text-cyan-600', count: 3 },
-                    { id: 'contacts', label: 'Contacts', icon: Users, color: 'text-purple-600', count: 2 }
+                    { id: 'food-safety', label: 'Food Safety', icon: Utensils, color: 'text-green-600', count: 10 },
+                    { id: 'licensing', label: 'Licensing', icon: Gavel, color: 'text-cyan-600', count: 10 },
+                    { id: 'service-requests', label: 'Service Requests', icon: ClipboardList, color: 'text-indigo-600', count: 10 },
+                    { id: 'inspections', label: 'Inspections', icon: AlertTriangle, color: 'text-orange-600', count: 10 },
+                    { id: 'premises', label: 'Premises', icon: Building2, color: 'text-teal-600', count: 10 },
+                    { id: 'enforcement', label: 'Enforcement', icon: Shield, color: 'text-red-600', count: 10 },
+                    { id: 'prosecutions', label: 'Prosecutions', icon: Scale, color: 'text-slate-600', count: 10 },
+                    { id: 'system-search', label: 'System & Search', icon: Search, color: 'text-blue-600', count: 10 },
+                    { id: 'contacts', label: 'Contacts', icon: Users, color: 'text-purple-600', count: 10 },
+                    { id: 'dogs-animals', label: 'Dogs & Animals', icon: Dog, color: 'text-amber-600', count: 10 }
                   ].map((module) => (
                     <button
                       key={module.id}
@@ -663,11 +663,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I investigate food poisoning incidents?",
-                        "How do I record food poisoning cases?",
-                        "How do I process online food business registrations?",
-                        "How do I create a premises record?",
-                        "How do I register a new food business?"
+                        "How do I create a food poisoning investigation record?",
+                        "How do I conduct food safety inspections?",
+                        "How do I create a premises record for food businesses?",
+                        "How do I register new food businesses online?",
+                        "How do I investigate food safety complaints?",
+                        "How do I take food samples during inspections?",
+                        "How do I handle food poisoning outbreaks?",
+                        "How do I create food safety service requests?",
+                        "How do I add enforcement actions to food cases?",
+                        "How do I upload inspection documents to food cases?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -691,15 +696,21 @@ export default function SearchInterface() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 mb-4">
                       <Dog className="h-5 w-5 text-amber-600" />
-                      <h3 className="text-lg font-semibold text-slate-800">Dogs</h3>
+                      <h3 className="text-lg font-semibold text-slate-800">Dogs & Animals</h3>
                       <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">Example Questions</span>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
                         "How do I create a new dog case record?",
-                        "How do I view dog records in the system?",
-                        "How do I search for dog records?",
-                        "How do I create a dangerous dog report?"
+                        "How do I search for existing dog records?",
+                        "How do I view dog case details?",
+                        "How do I create dangerous dog reports?",
+                        "How do I handle dog bite incident reports?",
+                        "How do I process dog control complaints?",
+                        "How do I add actions to dog cases?",
+                        "How do I track stray dog collections?",
+                        "How do I upload photos to dog cases?",
+                        "How do I manage dog licensing information?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -728,10 +739,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I create a service request?",
+                        "How do I create a new service request?",
+                        "How do I handle food hygiene service requests?",
+                        "How do I process trading standards complaints?",
+                        "How do I create waste management service requests?",
+                        "How do I handle port health service requests?",
                         "How do I assign service requests to officers?",
-                        "How do I track service request progress?",
-                        "How do I prioritize service requests?"
+                        "How do I track service request progress and status?",
+                        "How do I prioritize urgent service requests?",
+                        "How do I add contacts to service request records?",
+                        "How do I create inspection records from service requests?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -760,10 +777,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I save search criteria?",
-                        "How do I search for contacts?",
-                        "How do I submit ideas to the Idox Ideas Portal?",
-                        "How do I merge duplicate contacts?"
+                        "How do I search across all system modules?",
+                        "How do I save search criteria for reuse?",
+                        "How do I create advanced search filters?",
+                        "How do I export search results?",
+                        "How do I use recently viewed records?",
+                        "How do I bookmark frequently accessed records?",
+                        "How do I customize my user interface?",
+                        "How do I set default preferences?",
+                        "How do I manage notification settings?",
+                        "How do I track my search history?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -792,9 +815,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I log a noise complaint?",
-                        "How do I start enforcement action?",
-                        "How do I issue an improvement notice?"
+                        "How do I add enforcement actions to cases?",
+                        "How do I create improvement notices?",
+                        "How do I issue prohibition notices?",
+                        "How do I add compliance checks to cases?",
+                        "How do I create warning letters?",
+                        "How do I add enforcement follow-up actions?",
+                        "How do I generate formal enforcement notices?",
+                        "How do I track enforcement action compliance?",
+                        "How do I escalate enforcement actions?",
+                        "How do I prepare cases for prosecution?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -823,9 +853,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I collect food samples?",
-                        "How do I conduct a health and safety inspection?",
-                        "How do I prepare a prosecution case?"
+                        "How do I create a new inspection record?",
+                        "How do I conduct planned premises inspections?",
+                        "How do I perform food safety inspections?",
+                        "How do I conduct health and safety inspections?",
+                        "How do I create domestic property inspection records?",
+                        "How do I perform accident investigation inspections?",
+                        "How do I conduct licensing compliance inspections?",
+                        "How do I create follow-up inspection records?",
+                        "How do I collect samples during inspections?",
+                        "How do I upload inspection photos and documents?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -854,9 +891,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I link contacts to premises?",
-                        "How do I search for premises records?",
-                        "How do I add a new premises to the system?"
+                        "How do I create a new premises record?",
+                        "How do I search for existing premises records?",
+                        "How do I link contacts to premises records?",
+                        "How do I add additional contacts to premises?",
+                        "How do I update premises business information?",
+                        "How do I create food business premises records?",
+                        "How do I link licenses to premises records?",
+                        "How do I add inspection history to premises?",
+                        "How do I upload premises documents and photos?",
+                        "How do I merge duplicate premises records?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -885,9 +929,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I initiate prosecution proceedings?",
-                        "How do I track prosecution status?",
-                        "How do I prepare court documentation?"
+                        "How do I create a prosecution case record?",
+                        "How do I manage prosecution proceedings?",
+                        "How do I track prosecution case status?",
+                        "How do I prepare court documentation?",
+                        "How do I handle prosecution evidence?",
+                        "How do I process prosecution outcomes?",
+                        "How do I manage prosecution costs?",
+                        "How do I create food safety prosecution cases?",
+                        "How do I handle health and safety prosecutions?",
+                        "How do I track prosecution appeal processes?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -916,9 +967,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I process a license application?",
-                        "How do I apply for a premises license?",
-                        "How do I conduct a license review?"
+                        "How do I create a new licensing application?",
+                        "How do I process alcohol premises license applications?",
+                        "How do I handle personal license applications?",
+                        "How do I create taxi operator license applications?",
+                        "How do I process vehicle licensing applications?",
+                        "How do I handle animal activity license applications?",
+                        "How do I create HMO license applications?",
+                        "How do I process gambling premises license applications?",
+                        "How do I handle temporary event notice applications?",
+                        "How do I add documents to licensing applications?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -947,8 +1005,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I search for contacts?",
-                        "How do I merge duplicate contacts?"
+                        "How do I create new contact records?",
+                        "How do I search for existing contacts?",
+                        "How do I add additional contacts to cases?",
+                        "How do I update contact information?",
+                        "How do I merge duplicate contact records?",
+                        "How do I link contacts to premises?",
+                        "How do I send emails to contacts?",
+                        "How do I track communications with contacts?",
+                        "How do I add contact notes and history?",
+                        "How do I manage contact preferences and consent?"
                       ].map((question, index) => (
                         <button
                           key={index}

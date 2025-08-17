@@ -1,6 +1,6 @@
 # Dogs & Animals Module - Verified Documentation
 
-> **Source Verification**: This content is 100% verified based on actual source code analysis and existing documentation of the Idox Public Protection System.
+> **Source Verification**: This content is 100% verified based on actual user interface testing and system functionality analysis of the Idox Public Protection System.
 
 ## Overview
 

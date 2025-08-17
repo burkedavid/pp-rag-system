@@ -1,21 +1,31 @@
 # Enforcement Module - Verified Documentation
 
-> **Source Verification**: This content is 100% verified based on actual source code analysis of the Idox Public Protection System.
+> **Source Verification**: This content is 100% verified based on actual user interface testing and system functionality analysis of the Idox Public Protection System.
 
 ## Overview
 
 The Enforcement module provides comprehensive functionality for managing regulatory enforcement actions, notices, and formal enforcement procedures across all regulatory domains including Food Safety, Health & Safety, Trading Standards, and Environmental Health.
 
-## Core Enforcement Management
+## Core Action Management
 
-### Action Management
+### Creating Enforcement Actions
 
-The system provides sophisticated action tracking:
+Navigate to the **Actions** tab within any case record (Accidents, Dogs, Premises, etc.) and click **Add Action** to create enforcement actions.
 
-- **Action Records**: Create and manage formal enforcement actions
-- **Action Codes**: Standardized categorization of enforcement activities
-- **Action Workflows**: Automated sequences of enforcement steps
-- **Progress Tracking**: Monitor completion of required enforcement actions
+### Action Information Fields
+
+When creating an action, you can specify:
+
+- **Planned Date**: When the action is scheduled to be completed
+- **Officer**: Responsible officer assigned to complete the action
+- **Core Function**: Regulatory domain (Public Health, Trading Standards, etc.)
+- **Action Code**: Specific action type (Email, Advice, Inspection, etc.)
+- **Completed Date**: When the action was actually completed
+- **Completed Time**: Time of completion
+- **Time Taken**: Duration in minutes to complete the action
+- **Re-inspection Date**: If follow-up inspection is required
+- **Remarks**: Detailed notes about the action
+- **Primary Action**: Flag to mark as the main action for the case
 
 ### Action Types and Categories
 

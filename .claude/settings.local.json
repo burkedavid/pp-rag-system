@@ -28,7 +28,11 @@
       "Bash(npx next:*)",
       "Bash(lsof:*)",
       "Bash(git add:*)",
-      "Bash(git clean:*)"
+      "Bash(git clean:*)",
+      "WebFetch(domain:pp-idoxqa-automation.staging.idoxcloud.com)",
+      "Bash(wc:*)",
+      "Bash(cut:*)",
+      "Bash(ss:*)"
     ],
     "deny": [],
     "ask": []
