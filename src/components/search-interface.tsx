@@ -28,6 +28,14 @@ interface RAGResponse {
     similarity: number;
   }>;
   confidence: 'high' | 'medium' | 'low';
+  sourceQuality?: {
+    howToGuideCount: number;
+    verifiedContentCount: number;
+    faqContentCount: number;
+    moduleDocCount: number;
+    totalSources: number;
+    qualityScore: string;
+  };
 }
 
 interface SearchHistory {
@@ -497,6 +505,19 @@ export default function SearchInterface() {
                     Powered by Claude 4.0 & Titan v2
                   </div>
                 </div>
+
+                {/* Source Quality Indicator */}
+                {ragResponse.sourceQuality && (
+                  <div className="flex items-center justify-between">
+                    <div className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-blue-50 border border-blue-200 text-blue-800">
+                      <FileText className="h-3 w-3 mr-1.5" />
+                      {ragResponse.sourceQuality.qualityScore}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {ragResponse.sourceQuality.howToGuideCount} procedures • {ragResponse.sourceQuality.verifiedContentCount} verified • {ragResponse.sourceQuality.moduleDocCount} module docs • {ragResponse.sourceQuality.totalSources} total
+                    </div>
+                  </div>
+                )}
 
                 {/* Enhanced Answer Display */}
                 <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-6 border border-blue-100">

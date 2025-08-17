@@ -18,6 +18,14 @@ export interface RAGResponse {
     similarity: number;
   }>;
   confidence: 'high' | 'medium' | 'low';
+  sourceQuality: {
+    howToGuideCount: number;
+    verifiedContentCount: number;
+    faqContentCount: number;
+    moduleDocCount: number;
+    totalSources: number;
+    qualityScore: string;
+  };
 }
 
 export async function generateRAGResponse(
@@ -31,12 +39,39 @@ ${result.chunk_text}
 `)
     .join('\n\n');
 
-  const prompt = `You are an EXPERT ASSISTANT for the Idox Public Protection System software. Your role is to provide comprehensive, accurate, and helpful guidance for using this software system effectively.
+  const prompt = `You are an EXPERT ASSISTANT for the Idox Public Protection System software with access to comprehensive documentation covering 10 core regulatory modules.
+
+**Available Documentation Types:**
+- **How-To Guides**: Comprehensive step-by-step procedures based on 1,726 test cases (596 chunks)
+- **Module Documentation**: Official system documentation covering all features (460+ chunks)
+- **Verified Content**: 100% source-code verified module functionality (145 chunks)
+- **FAQ Documents**: Common user questions and scenarios (150+ chunks)
+
+**System Knowledge Base:**
+Your knowledge covers 10 core modules with complete procedural guidance for:
+- Food Safety & Premises Management (food poisoning investigations, inspections, registrations)
+- Licensing Applications (alcohol, gambling, taxi, animal, HMO licenses)
+- Service Requests (public complaints, notifications, regulatory requests)
+- Inspection Records (planned/unplanned inspections across all disciplines)
+- Enforcement Actions (notices, warnings, compliance tracking)
+- Prosecution Management (court proceedings, evidence, case outcomes)
+- Contacts & Communications (record management, notifications)
+- Dogs & Animals (incident reports, dangerous dog cases)
+- System Functions (search, navigation, configuration)
+- Premises Records (business registration, linking, management)
 
 Context from the software documentation:
 ${context}
 
 User Question: ${query}
+
+**RESPONSE STRATEGY BASED ON AVAILABLE CONTEXT:**
+- **How-To Guide Available**: Provide complete step-by-step workflow with exact navigation
+- **Module Documentation Available**: Focus on comprehensive feature descriptions and system capabilities
+- **Verified Content Available**: Emphasize interface elements and 100% verified functionality  
+- **FAQ Content Available**: Address common user scenarios and variations
+- **Multiple Sources**: Synthesize comprehensive guidance covering all aspects
+- **Limited Context**: Acknowledge limitations and suggest related functionality
 
 **RESPONSE REQUIREMENTS:**
 1. **Provide detailed software instructions** when the documentation contains specific steps, procedures, or workflows
@@ -45,7 +80,7 @@ User Question: ${query}
 4. **Reference software features** described in the documentation - modules, screens, forms, reports, workflows
 5. **If procedures are available**, format them clearly with numbered steps and proper navigation paths
 6. **Draw from ALL available information** in the context to provide the most complete answer possible
-7. **If specific instructions aren't available**, provide what information IS available and suggest where to find more details
+7. **Prioritize content marked as "100% verified" or from How-To guides** for highest accuracy
 
 **FORMATTING REQUIREMENTS:**
 1. **Use Clear Headers**: Start with ## Software Task, use ### for interface sections
@@ -108,17 +143,29 @@ Answer:`;
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
     const answer = responseBody.content[0].text;
 
-    // Determine confidence based on search result similarities and count
+    // Enhanced confidence calculation based on RAG data quality
     const avgSimilarity = searchResults.reduce((sum, result) => sum + result.similarity, 0) / searchResults.length;
     const resultCount = searchResults.length;
-    let confidence: 'high' | 'medium' | 'low' = 'low';
-    
-    // Optimized confidence scoring for example questions
     const maxSimilarity = Math.max(...searchResults.map(r => r.similarity));
     
-    if (maxSimilarity > 0.7 || (avgSimilarity > 0.4 && resultCount >= 3)) {
+    // Count high-quality source types
+    const howToGuideCount = searchResults.filter(r => r.source_file.includes('How-to-')).length;
+    const verifiedContentCount = searchResults.filter(r => r.source_file.includes('Verified')).length;
+    const faqContentCount = searchResults.filter(r => r.source_file.includes('faq')).length;
+    const moduleDocCount = searchResults.filter(r => r.source_file.includes('Module_Documentation')).length;
+    
+    let confidence: 'high' | 'medium' | 'low' = 'low';
+    
+    // Enhanced confidence scoring based on content quality and similarity
+    const qualitySourceCount = howToGuideCount + verifiedContentCount + moduleDocCount;
+    
+    if (maxSimilarity > 0.75 && (howToGuideCount >= 2 || verifiedContentCount >= 1 || moduleDocCount >= 2)) {
       confidence = 'high';
-    } else if (maxSimilarity > 0.5 || (avgSimilarity > 0.3 && resultCount >= 2)) {
+    } else if (maxSimilarity > 0.6 && (howToGuideCount >= 1 || verifiedContentCount >= 1 || avgSimilarity > 0.5)) {
+      confidence = 'high';
+    } else if (maxSimilarity > 0.7 || (avgSimilarity > 0.4 && qualitySourceCount >= 2)) {
+      confidence = 'high';
+    } else if (maxSimilarity > 0.4 || avgSimilarity > 0.3 || (qualitySourceCount >= 1 && maxSimilarity > 0.3)) {
       confidence = 'medium';
     } else if (avgSimilarity > 0.2 || resultCount >= 1) {
       confidence = 'medium';
@@ -130,10 +177,30 @@ Answer:`;
       similarity: result.similarity
     }));
 
+    // Calculate source quality indicators
+    const qualityScore = 
+      howToGuideCount >= 2 && verifiedContentCount >= 1 ? 'Comprehensive verified procedure' :
+      howToGuideCount >= 1 && verifiedContentCount >= 1 ? 'Verified procedural guidance' :
+      howToGuideCount >= 2 ? 'Step-by-step procedural guidance' :
+      verifiedContentCount >= 1 ? 'Interface-focused guidance' :
+      howToGuideCount >= 1 && moduleDocCount >= 1 ? 'Procedural with module documentation' :
+      moduleDocCount >= 2 ? 'Module documentation guidance' :
+      faqContentCount >= 2 ? 'Scenario-based guidance with common variations' :
+      moduleDocCount >= 1 ? 'Official module documentation' :
+      'General system guidance';
+
     return {
       answer,
       sources,
-      confidence
+      confidence,
+      sourceQuality: {
+        howToGuideCount,
+        verifiedContentCount,
+        faqContentCount,
+        moduleDocCount,
+        totalSources: resultCount,
+        qualityScore
+      }
     };
   } catch (error) {
     console.error('Error generating Claude response:', error);
