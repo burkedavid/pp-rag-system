@@ -684,16 +684,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I create a food poisoning investigation record?",
-                        "How do I conduct food safety inspections?",
+                        "How do I create Food Poisoning investigation records in the system?",
+                        "How do I navigate to Food Poisoning creation form in the system?",
                         "How do I create a premises record for food businesses?",
-                        "How do I register new food businesses online?",
-                        "How do I investigate food safety complaints?",
-                        "How do I take food samples during inspections?",
-                        "How do I handle food poisoning outbreaks?",
-                        "How do I create food safety service requests?",
-                        "How do I add enforcement actions to food cases?",
-                        "How do I upload inspection documents to food cases?"
+                        "How do I select case types when creating Food Poisoning investigations?",
+                        "How do I record onset dates and symptoms in food poisoning cases?",
+                        "How do I link premises to food poisoning investigation records?",
+                        "How do I complete initial case information for food poisoning investigations?",
+                        "How do I record patient symptoms in food poisoning cases?",
+                        "How do I create service request records in the system?",
+                        "How do I navigate to premises creation forms?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -726,12 +726,12 @@ export default function SearchInterface() {
                         "How do I search for existing dog records?",
                         "How do I view dog case details?",
                         "How do I create dangerous dog reports?",
-                        "How do I handle dog bite incident reports?",
-                        "How do I process dog control complaints?",
-                        "How do I add actions to dog cases?",
-                        "How do I track stray dog collections?",
-                        "How do I upload photos to dog cases?",
-                        "How do I manage dog licensing information?"
+                        "How do I record dog bite incident details?",
+                        "How do I complete case identification for dog cases?",
+                        "How do I select dog case types when creating records?",
+                        "How do I navigate to dog case creation forms?",
+                        "How do I record incident dates for dog cases?",
+                        "How do I link contacts to dog case records?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -760,16 +760,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I create a new service request?",
-                        "How do I handle food hygiene service requests?",
-                        "How do I process trading standards complaints?",
-                        "How do I create waste management service requests?",
-                        "How do I handle port health service requests?",
+                        "How do I create service request records in the system?",
+                        "How do I navigate to service request creation forms?",
+                        "How do I select service request categories when creating records?",
+                        "How do I record complaint details in service requests?",
                         "How do I assign service requests to officers?",
-                        "How do I track service request progress and status?",
-                        "How do I prioritize urgent service requests?",
-                        "How do I add contacts to service request records?",
-                        "How do I create inspection records from service requests?"
+                        "How do I complete basic information for service requests?",
+                        "How do I link premises to service request records?",
+                        "How do I record report dates in service requests?",
+                        "How do I create food hygiene service request records?",
+                        "How do I track service request status and progress?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -804,10 +804,10 @@ export default function SearchInterface() {
                         "How do I export search results?",
                         "How do I use recently viewed records?",
                         "How do I bookmark frequently accessed records?",
-                        "How do I customize my user interface?",
-                        "How do I set default preferences?",
-                        "How do I manage notification settings?",
-                        "How do I track my search history?"
+                        "How do I navigate between different system modules?",
+                        "How do I access search history features?",
+                        "How do I set up custom search parameters?",
+                        "How do I use the global search functionality?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -836,16 +836,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I add enforcement actions to cases?",
-                        "How do I create improvement notices?",
-                        "How do I issue prohibition notices?",
-                        "How do I add compliance checks to cases?",
-                        "How do I create warning letters?",
-                        "How do I add enforcement follow-up actions?",
+                        "How do I create enforcement action records?",
+                        "How do I navigate to enforcement creation forms?",
+                        "How do I select enforcement action types?",
+                        "How do I record enforcement dates and details?",
+                        "How do I link enforcement actions to inspection records?",
+                        "How do I create improvement notice records?",
                         "How do I generate formal enforcement notices?",
-                        "How do I track enforcement action compliance?",
-                        "How do I escalate enforcement actions?",
-                        "How do I prepare cases for prosecution?"
+                        "How do I complete enforcement action forms?",
+                        "How do I track enforcement compliance status?",
+                        "How do I record enforcement follow-up actions?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -875,15 +875,15 @@ export default function SearchInterface() {
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
                         "How do I create a new inspection record?",
-                        "How do I conduct planned premises inspections?",
-                        "How do I perform food safety inspections?",
-                        "How do I conduct health and safety inspections?",
-                        "How do I create domestic property inspection records?",
-                        "How do I perform accident investigation inspections?",
-                        "How do I conduct licensing compliance inspections?",
-                        "How do I create follow-up inspection records?",
-                        "How do I collect samples during inspections?",
-                        "How do I upload inspection photos and documents?"
+                        "How do I navigate to Create Planned Inspection in the system?",
+                        "How do I select inspection categories when creating inspection records?",
+                        "How do I complete inspection scheduling details?",
+                        "How do I link source cases to inspection records?",
+                        "How do I record inspection findings and observations?",
+                        "How do I complete basic inspection details?",
+                        "How do I create planned premises inspection records?",
+                        "How do I assign inspectors to inspection records?",
+                        "How do I record planned dates for inspection activities?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -915,13 +915,13 @@ export default function SearchInterface() {
                         "How do I create a new premises record?",
                         "How do I search for existing premises records?",
                         "How do I link contacts to premises records?",
-                        "How do I add additional contacts to premises?",
-                        "How do I update premises business information?",
+                        "How do I navigate to premises creation forms?",
+                        "How do I complete basic premises information?",
+                        "How do I select premises registration types?",
+                        "How do I record premises address details?",
                         "How do I create food business premises records?",
-                        "How do I link licenses to premises records?",
-                        "How do I add inspection history to premises?",
-                        "How do I upload premises documents and photos?",
-                        "How do I merge duplicate premises records?"
+                        "How do I link business information to premises?",
+                        "How do I update premises contact information?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -950,16 +950,16 @@ export default function SearchInterface() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
-                        "How do I create a prosecution case record?",
-                        "How do I manage prosecution proceedings?",
+                        "How do I create prosecution case records?",
+                        "How do I navigate to prosecution creation forms?",
+                        "How do I complete prosecution case information?",
+                        "How do I record prosecution proceedings details?",
                         "How do I track prosecution case status?",
-                        "How do I prepare court documentation?",
-                        "How do I handle prosecution evidence?",
-                        "How do I process prosecution outcomes?",
-                        "How do I manage prosecution costs?",
-                        "How do I create food safety prosecution cases?",
-                        "How do I handle health and safety prosecutions?",
-                        "How do I track prosecution appeal processes?"
+                        "How do I link prosecution cases to source records?",
+                        "How do I record court hearing dates?",
+                        "How do I complete prosecution outcome information?",
+                        "How do I create legal action records?",
+                        "How do I manage prosecution evidence records?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -989,15 +989,15 @@ export default function SearchInterface() {
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {[
                         "How do I create a new licensing application?",
-                        "How do I process alcohol premises license applications?",
-                        "How do I handle personal license applications?",
-                        "How do I create taxi operator license applications?",
-                        "How do I process vehicle licensing applications?",
-                        "How do I handle animal activity license applications?",
-                        "How do I create HMO license applications?",
-                        "How do I process gambling premises license applications?",
-                        "How do I handle temporary event notice applications?",
-                        "How do I add documents to licensing applications?"
+                        "How do I navigate to licensing application forms?",
+                        "How do I select license types when creating applications?",
+                        "How do I complete basic application information?",
+                        "How do I link applicant contacts to licensing records?",
+                        "How do I record application submission dates?",
+                        "How do I create alcohol premises license applications?",
+                        "How do I link premises to licensing applications?",
+                        "How do I process license application forms?",
+                        "How do I track licensing application status?"
                       ].map((question, index) => (
                         <button
                           key={index}
@@ -1028,14 +1028,14 @@ export default function SearchInterface() {
                       {[
                         "How do I create new contact records?",
                         "How do I search for existing contacts?",
-                        "How do I add additional contacts to cases?",
+                        "How do I navigate to contact creation forms?",
+                        "How do I complete contact information details?",
+                        "How do I link contacts to case records?",
                         "How do I update contact information?",
+                        "How do I record contact communication preferences?",
+                        "How do I create business contact records?",
                         "How do I merge duplicate contact records?",
-                        "How do I link contacts to premises?",
-                        "How do I send emails to contacts?",
-                        "How do I track communications with contacts?",
-                        "How do I add contact notes and history?",
-                        "How do I manage contact preferences and consent?"
+                        "How do I add contact addresses and details?"
                       ].map((question, index) => (
                         <button
                           key={index}
