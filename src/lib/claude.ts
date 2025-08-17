@@ -32,9 +32,48 @@ export async function generateRAGResponse(
   query: string,
   searchResults: SearchResult[]
 ): Promise<RAGResponse> {
+  // CRITICAL: Anti-hallucination validation
+  const maxSimilarity = searchResults.length > 0 ? Math.max(...searchResults.map(r => r.similarity)) : 0;
+  
+  // If similarity is too low, provide a safe fallback response
+  if (maxSimilarity < 0.4) {
+    return {
+      answer: `## Information Not Available
+
+I don't have sufficient information in the documentation to answer your question about "${query}".
+
+The search found some potentially related content, but the similarity scores are too low (below 40%) to provide reliable guidance. This suggests that:
+
+- The specific procedure you're asking about may not be documented in the available guides
+- The terminology or approach you're describing might not match the system's actual capabilities
+- You may need to contact your system administrator for guidance on this topic
+
+**Available alternatives:**
+- Try rephrasing your question using different terminology
+- Break down your question into smaller, more specific parts
+- Consult with your system administrator or technical support
+
+*This response prioritizes accuracy over completeness to prevent providing incorrect information.*`,
+      sources: searchResults.map(result => ({
+        source_file: result.source_file,
+        section_title: result.section_title,
+        similarity: result.similarity
+      })),
+      confidence: 'low' as const,
+      sourceQuality: {
+        howToGuideCount: 0,
+        verifiedContentCount: 0,
+        faqContentCount: 0,
+        moduleDocCount: 0,
+        totalSources: searchResults.length,
+        qualityScore: 'Insufficient information available'
+      }
+    };
+  }
+
   const context = searchResults
     .map((result, index) => `
-[Source ${index + 1}: ${result.source_file} - ${result.section_title}]
+[Source ${index + 1}: ${result.source_file} - ${result.section_title}] (Similarity: ${(result.similarity * 100).toFixed(1)}%)
 ${result.chunk_text}
 `)
     .join('\n\n');
@@ -73,13 +112,20 @@ User Question: ${query}
 - **Multiple Sources**: Synthesize comprehensive guidance covering all aspects
 - **Limited Context**: Acknowledge limitations and suggest related functionality
 
+**CRITICAL ANTI-HALLUCINATION REQUIREMENTS:**
+1. **NEVER FABRICATE INFORMATION** - Only provide information explicitly contained in the provided context
+2. **STRICT SOURCE ADHERENCE** - Every piece of information must be directly traceable to the source documents
+3. **NO EXTRAPOLATION** - Do not infer, assume, or extend beyond what is explicitly documented
+4. **ACKNOWLEDGE LIMITATIONS** - If the context doesn't contain sufficient information, clearly state this
+5. **VERIFY CONTEXT RELEVANCE** - Ensure the source material actually addresses the user's question
+
 **RESPONSE REQUIREMENTS:**
-1. **Provide detailed software instructions** when the documentation contains specific steps, procedures, or workflows
+1. **Provide detailed software instructions** ONLY when the documentation contains specific steps, procedures, or workflows
 2. **Use exact interface elements** from the documentation - button names, menu paths, field labels, module names
-3. **Include step-by-step procedures** when available - "Navigate to Module > Menu Item > Action"
-4. **Reference software features** described in the documentation - modules, screens, forms, reports, workflows
-5. **If procedures are available**, format them clearly with numbered steps and proper navigation paths
-6. **Draw from ALL available information** in the context to provide the most complete answer possible
+3. **Include step-by-step procedures** ONLY when available in sources - "Navigate to Module > Menu Item > Action"
+4. **Reference software features** ONLY those described in the documentation - modules, screens, forms, reports, workflows
+5. **If procedures are incomplete or missing**, state this clearly instead of filling gaps with assumptions
+6. **Draw ONLY from information** explicitly present in the context
 7. **Prioritize content marked as "100% verified" or from How-To guides** for highest accuracy
 
 **FORMATTING REQUIREMENTS:**
@@ -112,7 +158,20 @@ EXAMPLE FORMAT:
 ### Important Software Notes
 *Key software behaviors, limitations, or tips for effective system usage.*
 
-Format your response as clear software instructions that a user could immediately follow to complete their task in the Idox system, with professional markdown formatting that will render beautifully in a modern web interface.
+**CONTEXT VALIDATION CHECKLIST:**
+Before responding, verify:
+- Does the context actually contain information relevant to the user's question?
+- Are there specific, actionable steps documented for this task?
+- Can you trace every piece of your response back to the source material?
+- If similarity scores are below 70%, are you providing appropriate caveats?
+
+**RESPONSE FORMAT RULES:**
+- If context is insufficient or similarity is low, start with: "Based on the available documentation, I have limited information about..."
+- If procedures are incomplete, state: "The documentation covers [specific parts] but doesn't include complete procedures for..."
+- Always cite which source documents your information comes from
+- Never present assumptions as facts
+
+Format your response as clear software instructions that a user could immediately follow to complete their task in the Idox system, with professional markdown formatting that will render beautifully in a modern web interface. If the context is insufficient, clearly acknowledge limitations.
 
 Answer:`;
 
@@ -156,19 +215,30 @@ Answer:`;
     
     let confidence: 'high' | 'medium' | 'low' = 'low';
     
-    // Enhanced confidence scoring based on content quality and similarity
+    // STRICT Anti-Hallucination Confidence Scoring
     const qualitySourceCount = howToGuideCount + verifiedContentCount + moduleDocCount;
     
-    if (maxSimilarity > 0.75 && (howToGuideCount >= 2 || verifiedContentCount >= 1 || moduleDocCount >= 2)) {
-      confidence = 'high';
-    } else if (maxSimilarity > 0.6 && (howToGuideCount >= 1 || verifiedContentCount >= 1 || avgSimilarity > 0.5)) {
-      confidence = 'high';
-    } else if (maxSimilarity > 0.7 || (avgSimilarity > 0.4 && qualitySourceCount >= 2)) {
-      confidence = 'high';
-    } else if (maxSimilarity > 0.4 || avgSimilarity > 0.3 || (qualitySourceCount >= 1 && maxSimilarity > 0.3)) {
-      confidence = 'medium';
-    } else if (avgSimilarity > 0.2 || resultCount >= 1) {
-      confidence = 'medium';
+    // CRITICAL: Prevent hallucination with strict similarity thresholds
+    if (maxSimilarity < 0.7) {
+      // If best match is below 70%, always medium or low confidence
+      if (maxSimilarity > 0.5 && qualitySourceCount >= 2) {
+        confidence = 'medium';
+      } else if (maxSimilarity > 0.4 && qualitySourceCount >= 1) {
+        confidence = 'medium';
+      } else {
+        confidence = 'low';
+      }
+    } else {
+      // Only allow high confidence with strong similarity AND quality sources
+      if (maxSimilarity > 0.8 && (howToGuideCount >= 2 || verifiedContentCount >= 1)) {
+        confidence = 'high';
+      } else if (maxSimilarity > 0.75 && qualitySourceCount >= 2) {
+        confidence = 'high';
+      } else if (maxSimilarity > 0.7 && avgSimilarity > 0.6) {
+        confidence = 'medium';
+      } else {
+        confidence = 'medium';
+      }
     }
 
     const sources = searchResults.map(result => ({

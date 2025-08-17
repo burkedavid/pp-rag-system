@@ -32,8 +32,8 @@ const MODEL_CONFIGS: Record<string, ModelConfig> = {
     options: {
       ...DEFAULT_MODEL_OPTIONS,
       maxTokens: 4000,
-      temperature: 0.2,  // Reduced from 0.3 for more consistent responses
-      topK: 200  // Reduced from 250 for more focused responses
+      temperature: 0.1,  // ULTRA-CONSERVATIVE: Reduced from 0.2 to prevent hallucination
+      topK: 150  // Further reduced for maximum precision
     }
   },
   'claude-3-5-sonnet': {

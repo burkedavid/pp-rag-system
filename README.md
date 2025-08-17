@@ -4,11 +4,12 @@ A sophisticated AI-powered RAG (Retrieval-Augmented Generation) system for the I
 
 ## ✨ Features
 
-- **🧠 Advanced AI Integration**: Claude 4.0 Sonnet for intelligent, contextual responses
+- **🚨 CRITICAL: Anti-Hallucination System**: Comprehensive safeguards prevent AI fabrication with strict similarity thresholds (<40% triggers safe fallback), ultra-conservative model settings (temperature: 0.1), and explicit source validation requirements
+- **🧠 Advanced AI Integration**: Claude 4.0 Sonnet for intelligent, contextual responses with regulatory compliance focus
 - **🔍 Hybrid Search**: 70% semantic + 30% keyword search for optimal results
 - **🎨 Modern Professional UI**: Sophisticated blue-themed interface with professional loading animations
 - **📱 Responsive Design**: Mobile-optimized with smooth animations and professional styling
-- **🎯 Optimized Search Performance**: Tuned similarity thresholds and confidence scoring
+- **🎯 Robust Confidence Scoring**: Strict anti-hallucination requirements with transparent similarity-based confidence levels
 - **📊 Smart Analytics**: AI usage tracking with enhanced confidence scoring and tooltips
 - **💾 Comprehensive Coverage**: 969 document chunks across 27 user guide modules
 - **⚡ Real-time Search**: Instant suggestions, search history, and professional loading states
@@ -434,26 +435,70 @@ embedding VECTOR(1024)
 WHERE 1 - (embedding <=> query_vector) > 0.3
 ```
 
-#### Confidence Scoring
+#### 🚨 CRITICAL: Anti-Hallucination System
 
-**Enhanced confidence calculation with maximum similarity consideration:**
+**Comprehensive safeguards prevent AI from fabricating information:**
+
 ```javascript
-// Optimized scoring for example questions
-const maxSimilarity = Math.max(...searchResults.map(r => r.similarity));
+// CRITICAL: Anti-hallucination validation - similarity thresholds
+const maxSimilarity = searchResults.length > 0 ? Math.max(...searchResults.map(r => r.similarity)) : 0;
 
-if (maxSimilarity > 0.7 || (avgSimilarity > 0.4 && resultCount >= 3)) {
-  confidence = 'high';
-} else if (maxSimilarity > 0.5 || (avgSimilarity > 0.3 && resultCount >= 2)) {
-  confidence = 'medium';
-} else if (avgSimilarity > 0.2 || resultCount >= 1) {
-  confidence = 'medium';
+// If similarity is too low, provide safe fallback response
+if (maxSimilarity < 0.4) {
+  return {
+    answer: `## Information Not Available
+I don't have sufficient information in the documentation to answer your question...`,
+    confidence: 'low',
+    sourceQuality: { qualityScore: 'Insufficient information available' }
+  };
 }
 ```
 
-**Confidence Tooltips for User Transparency:**
-- **High Confidence**: Strong match found in documentation (>70% similarity)
-- **Medium Confidence**: Moderate match found (>50% similarity)  
-- **Low Confidence**: Limited matching content found (<50% similarity)
+**Enhanced Confidence Scoring - Strict Anti-Hallucination Requirements:**
+```javascript
+// STRICT Anti-Hallucination Confidence Scoring
+const qualitySourceCount = howToGuideCount + verifiedContentCount + moduleDocCount;
+
+// CRITICAL: Prevent hallucination with strict similarity thresholds
+if (maxSimilarity < 0.7) {
+  // If best match is below 70%, always medium or low confidence
+  if (maxSimilarity > 0.5 && qualitySourceCount >= 2) {
+    confidence = 'medium';
+  } else if (maxSimilarity > 0.4 && qualitySourceCount >= 1) {
+    confidence = 'medium';
+  } else {
+    confidence = 'low';
+  }
+} else {
+  // Only allow high confidence with strong similarity AND quality sources
+  if (maxSimilarity > 0.8 && (howToGuideCount >= 2 || verifiedContentCount >= 1)) {
+    confidence = 'high';
+  } else if (maxSimilarity > 0.75 && qualitySourceCount >= 2) {
+    confidence = 'high';
+  } else {
+    confidence = 'medium';
+  }
+}
+```
+
+**AI Model Configuration - Ultra-Conservative Settings:**
+```javascript
+// ULTRA-CONSERVATIVE: Anti-hallucination model settings
+temperature: 0.1,  // Reduced from 0.3 to prevent hallucination
+topK: 150          // Further reduced for maximum precision
+```
+
+**Explicit Anti-Hallucination Prompt Instructions:**
+- **NEVER FABRICATE INFORMATION** - Only provide information explicitly in context
+- **STRICT SOURCE ADHERENCE** - Every piece of information must be traceable to sources
+- **NO EXTRAPOLATION** - Do not infer, assume, or extend beyond documented content
+- **ACKNOWLEDGE LIMITATIONS** - If context doesn't contain sufficient information, clearly state this
+- **VERIFY CONTEXT RELEVANCE** - Ensure source material actually addresses the user's question
+
+**Confidence Transparency for Regulatory Compliance:**
+- **High Confidence**: Strong match found (>75% similarity) with quality sources
+- **Medium Confidence**: Moderate match found (40-75% similarity) with appropriate limitations
+- **Low Confidence**: Insufficient information available (<40% similarity) - safe fallback response
 
 ### 🎯 Quality Assurance & System Tuning
 
@@ -587,6 +632,26 @@ node scripts/quick-test.js
 
 ## 🔒 Security & Compliance
 
+### 🚨 CRITICAL: Regulatory Safety & Anti-Hallucination
+
+**Why Anti-Hallucination is Essential for Regulatory Systems:**
+
+This RAG system serves government regulatory officers making compliance decisions with legal consequences. **AI hallucination in this context is extremely dangerous** as it could:
+- ❌ Provide incorrect legal procedures leading to invalid enforcement actions
+- ❌ Give false information about regulatory requirements, compromising public safety
+- ❌ Create fabricated compliance guidance that violates statutory obligations
+- ❌ Generate incorrect inspection procedures, missing critical health hazards
+
+**Our Comprehensive Solution:**
+- ✅ **Strict Similarity Thresholds**: <40% similarity triggers "Information Not Available" response
+- ✅ **Conservative AI Settings**: Ultra-low temperature (0.1) prevents creative fabrication
+- ✅ **Source Validation**: Every response must be traceable to documentation
+- ✅ **Transparent Limitations**: System explicitly acknowledges when information is insufficient
+- ✅ **Quality Source Requirements**: High confidence requires verified procedural content
+
+**Result**: The system will **refuse to answer** rather than risk providing incorrect regulatory guidance.
+
+### Standard Security Features
 - **🔐 Secure Credentials**: Environment-based AWS credential management
 - **🌐 HTTPS**: Encrypted communication in production
 - **📊 Data Protection**: Public documentation with no sensitive data
