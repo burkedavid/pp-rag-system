@@ -59,7 +59,53 @@ export async function initializeDatabase() {
     ON document_chunks USING gin(to_tsvector('english', chunk_text));
   `;
   
-  console.log('Database initialized successfully');
+  // Create question_logs table for admin dashboard
+  await sql`
+    CREATE TABLE IF NOT EXISTS question_logs (
+      id SERIAL PRIMARY KEY,
+      query TEXT NOT NULL,
+      confidence VARCHAR(10) NOT NULL,
+      similarity_score DECIMAL(4,3) NOT NULL,
+      sources_count INTEGER NOT NULL,
+      source_quality_score TEXT NOT NULL,
+      response_time_ms INTEGER NOT NULL,
+      model_used VARCHAR(100) NOT NULL,
+      timestamp TIMESTAMP DEFAULT NOW(),
+      user_feedback VARCHAR(20),
+      ip_address INET,
+      search_results_count INTEGER DEFAULT 0,
+      how_to_guide_count INTEGER DEFAULT 0,
+      verified_content_count INTEGER DEFAULT 0,
+      faq_content_count INTEGER DEFAULT 0,
+      module_doc_count INTEGER DEFAULT 0,
+      answer_length INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `;
+  
+  // Create indexes for question_logs table
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_question_logs_confidence 
+    ON question_logs(confidence);
+  `;
+  
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_question_logs_timestamp 
+    ON question_logs(timestamp);
+  `;
+  
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_question_logs_similarity 
+    ON question_logs(similarity_score);
+  `;
+
+  // Full-text search index on queries
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_question_logs_query_search 
+    ON question_logs USING gin(to_tsvector('english', query));
+  `;
+  
+  console.log('Database initialized successfully (including admin tables)');
 }
 
 export async function insertDocumentChunk(chunk: Omit<DocumentChunk, 'id' | 'created_at'>) {

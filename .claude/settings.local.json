@@ -44,7 +44,11 @@
       "Bash(docker:*)",
       "Bash(./scripts/run-with-docker.sh:*)",
       "Bash(npm run navigation:cleanup:*)",
-      "Bash(npm run navigation:test:*)"
+      "Bash(npm run navigation:test:*)",
+      "Bash(find:*)",
+      "Bash(kill:*)",
+      "Bash(fuser:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": [],

@@ -3,6 +3,7 @@ import { sql, hybridSearch } from '@/lib/database';
 import { generateRAGResponse } from '@/lib/claude';
 import { logAIUsage } from '@/lib/ai-audit';
 import { generateEmbedding } from '@/lib/embeddings';
+import { logQuestion } from '@/lib/admin-database';
 
 async function vectorSearch(query: string, limit: number = 5) {
   try {
@@ -39,13 +40,20 @@ async function vectorSearch(query: string, limit: number = 5) {
   }
 }
 
-
 function generateMockResponse(query: string, searchResults: any[]) {
   if (searchResults.length === 0) {
     return {
       answer: "I couldn't find relevant information in the documentation to answer your question. Please try rephrasing your query or contact your system administrator for assistance.",
       sources: [],
-      confidence: 'low' as const
+      confidence: 'low' as 'high' | 'medium' | 'low',
+      sourceQuality: {
+        howToGuideCount: 0,
+        verifiedContentCount: 0,
+        faqContentCount: 0,
+        moduleDocCount: 0,
+        totalSources: 0,
+        qualityScore: 'No relevant documentation found'
+      }
     };
   }
 
@@ -69,15 +77,30 @@ function generateMockResponse(query: string, searchResults: any[]) {
 
   const confidence = searchResults.length >= 3 ? 'high' : searchResults.length >= 2 ? 'medium' : 'low';
 
+  // Calculate source quality metrics for fallback
+  const howToGuideCount = searchResults.filter(r => r.source_file.includes('How-to-')).length;
+  const verifiedContentCount = searchResults.filter(r => r.source_file.includes('Verified')).length;
+  const faqContentCount = searchResults.filter(r => r.source_file.includes('faq')).length;
+  const moduleDocCount = searchResults.filter(r => r.source_file.includes('Module_Documentation')).length;
+
   return {
     answer,
     sources,
-    confidence: confidence as 'high' | 'medium' | 'low'
+    confidence: confidence as 'high' | 'medium' | 'low',
+    sourceQuality: {
+      howToGuideCount,
+      verifiedContentCount,
+      faqContentCount,
+      moduleDocCount,
+      totalSources: searchResults.length,
+      qualityScore: 'Limited documentation match'
+    }
   };
 }
 
 export async function POST(req: NextRequest) {
   const startTime = performance.now();
+  let questionLogData: any = null;
   
   try {
     const { query, limit = 5 } = await req.json();
@@ -89,13 +112,54 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Initialize question log data
+    const userIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    questionLogData = {
+      query,
+      ip_address: userIP,
+      model_used: 'anthropic.claude-sonnet-4-20250514-v1:0',
+      search_results_count: 0,
+      sources_count: 0,
+      similarity_score: 0,
+      confidence: 'low' as 'high' | 'medium' | 'low',
+      source_quality_score: 'Processing...',
+      response_time_ms: 0,
+      answer_length: 0,
+      how_to_guide_count: 0,
+      verified_content_count: 0,
+      faq_content_count: 0,
+      module_doc_count: 0
+    };
+
     // Use hybrid search combining semantic and keyword search
     const queryEmbedding = await generateEmbedding(query);
     const searchResults = await hybridSearch(queryEmbedding, query, limit);
     
+    // Update search metrics
+    questionLogData.search_results_count = searchResults.length;
+    questionLogData.similarity_score = searchResults.length > 0 
+      ? Math.max(...searchResults.map(r => r.similarity)) 
+      : 0;
+    
     try {
       // Try to use Claude 4.0 for enhanced response generation
       const claudeResponse = await generateRAGResponse(query, searchResults);
+      
+      const endTime = performance.now();
+      
+      // Update question log data with successful response
+      questionLogData.confidence = claudeResponse.confidence;
+      questionLogData.sources_count = claudeResponse.sources.length;
+      questionLogData.source_quality_score = claudeResponse.sourceQuality?.qualityScore || 'Unknown';
+      questionLogData.response_time_ms = Math.round(endTime - startTime);
+      questionLogData.answer_length = claudeResponse.answer.length;
+      questionLogData.how_to_guide_count = claudeResponse.sourceQuality?.howToGuideCount || 0;
+      questionLogData.verified_content_count = claudeResponse.sourceQuality?.verifiedContentCount || 0;
+      questionLogData.faq_content_count = claudeResponse.sourceQuality?.faqContentCount || 0;
+      questionLogData.module_doc_count = claudeResponse.sourceQuality?.moduleDocCount || 0;
+
+      // Log the question to admin database
+      await logQuestion(questionLogData);
       
       // Log successful AI usage
       await logAIUsage({
@@ -107,7 +171,7 @@ export async function POST(req: NextRequest) {
           inputTokens: Math.ceil(query.length / 4), // Rough estimate
           outputTokens: Math.ceil(claudeResponse.answer.length / 4),
           totalTokens: Math.ceil((query.length + claudeResponse.answer.length) / 4),
-          duration: performance.now() - startTime
+          duration: endTime - startTime
         },
         success: true
       });
@@ -122,6 +186,26 @@ export async function POST(req: NextRequest) {
     } catch (claudeError) {
       console.warn('Claude 4.0 unavailable, falling back to keyword search:', claudeError);
       
+      const endTime = performance.now();
+      
+      // Generate fallback response
+      const response = generateMockResponse(query, searchResults);
+      
+      // Update question log data with fallback response
+      questionLogData.confidence = response.confidence;
+      questionLogData.sources_count = response.sources.length;
+      questionLogData.source_quality_score = response.sourceQuality?.qualityScore || 'Fallback mode';
+      questionLogData.response_time_ms = Math.round(endTime - startTime);
+      questionLogData.answer_length = response.answer.length;
+      questionLogData.how_to_guide_count = response.sourceQuality?.howToGuideCount || 0;
+      questionLogData.verified_content_count = response.sourceQuality?.verifiedContentCount || 0;
+      questionLogData.faq_content_count = response.sourceQuality?.faqContentCount || 0;
+      questionLogData.module_doc_count = response.sourceQuality?.moduleDocCount || 0;
+      questionLogData.model_used = 'fallback-mode';
+
+      // Log the question to admin database
+      await logQuestion(questionLogData);
+      
       // Log failed AI usage
       await logAIUsage({
         promptType: 'rag-response',
@@ -132,14 +216,12 @@ export async function POST(req: NextRequest) {
           inputTokens: Math.ceil(query.length / 4),
           outputTokens: 0,
           totalTokens: Math.ceil(query.length / 4),
-          duration: performance.now() - startTime
+          duration: endTime - startTime
         },
         success: false,
         errorMessage: claudeError instanceof Error ? claudeError.message : 'Unknown error'
       });
       
-      // Fallback to mock response
-      const response = generateMockResponse(query, searchResults);
       return NextResponse.json({
         ...response,
         query,
@@ -150,6 +232,20 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('RAG query error:', error);
+    
+    // Log error case if we have question data
+    if (questionLogData) {
+      const endTime = performance.now();
+      questionLogData.response_time_ms = Math.round(endTime - startTime);
+      questionLogData.source_quality_score = 'Error occurred';
+      questionLogData.model_used = 'error';
+      try {
+        await logQuestion(questionLogData);
+      } catch (logError) {
+        console.error('Failed to log error question:', logError);
+      }
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error during query processing' },
       { status: 500 }
@@ -170,14 +266,54 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  // Initialize question log data for GET requests
+  const userIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+  let questionLogData = {
+    query,
+    ip_address: userIP,
+    model_used: 'anthropic.claude-sonnet-4-20250514-v1:0',
+    search_results_count: 0,
+    sources_count: 0,
+    similarity_score: 0,
+    confidence: 'low' as 'high' | 'medium' | 'low',
+    source_quality_score: 'Processing...',
+    response_time_ms: 0,
+    answer_length: 0,
+    how_to_guide_count: 0,
+    verified_content_count: 0,
+    faq_content_count: 0,
+    module_doc_count: 0
+  };
+
   try {
     // Use hybrid search combining semantic and keyword search
     const queryEmbedding = await generateEmbedding(query);
     const searchResults = await hybridSearch(queryEmbedding, query, limit);
     
+    questionLogData.search_results_count = searchResults.length;
+    questionLogData.similarity_score = searchResults.length > 0 
+      ? Math.max(...searchResults.map(r => r.similarity)) 
+      : 0;
+    
     try {
       // Try to use Claude 4.0 for enhanced response generation
       const claudeResponse = await generateRAGResponse(query, searchResults);
+      
+      const endTime = performance.now();
+      
+      // Update question log data
+      questionLogData.confidence = claudeResponse.confidence;
+      questionLogData.sources_count = claudeResponse.sources.length;
+      questionLogData.source_quality_score = claudeResponse.sourceQuality?.qualityScore || 'Unknown';
+      questionLogData.response_time_ms = Math.round(endTime - startTime);
+      questionLogData.answer_length = claudeResponse.answer.length;
+      questionLogData.how_to_guide_count = claudeResponse.sourceQuality?.howToGuideCount || 0;
+      questionLogData.verified_content_count = claudeResponse.sourceQuality?.verifiedContentCount || 0;
+      questionLogData.faq_content_count = claudeResponse.sourceQuality?.faqContentCount || 0;
+      questionLogData.module_doc_count = claudeResponse.sourceQuality?.moduleDocCount || 0;
+
+      // Log the question
+      await logQuestion(questionLogData);
       
       // Log successful AI usage
       await logAIUsage({
@@ -189,7 +325,7 @@ export async function GET(req: NextRequest) {
           inputTokens: Math.ceil(query.length / 4),
           outputTokens: Math.ceil(claudeResponse.answer.length / 4),
           totalTokens: Math.ceil((query.length + claudeResponse.answer.length) / 4),
-          duration: performance.now() - startTime
+          duration: endTime - startTime
         },
         success: true
       });
@@ -204,8 +340,24 @@ export async function GET(req: NextRequest) {
     } catch (claudeError) {
       console.warn('Claude 4.0 unavailable, falling back to keyword search:', claudeError);
       
-      // Fallback to mock response
+      const endTime = performance.now();
       const response = generateMockResponse(query, searchResults);
+      
+      // Update question log data for fallback
+      questionLogData.confidence = response.confidence;
+      questionLogData.sources_count = response.sources.length;
+      questionLogData.source_quality_score = response.sourceQuality?.qualityScore || 'Fallback';
+      questionLogData.response_time_ms = Math.round(endTime - startTime);
+      questionLogData.answer_length = response.answer.length;
+      questionLogData.model_used = 'fallback-mode';
+      questionLogData.how_to_guide_count = response.sourceQuality?.howToGuideCount || 0;
+      questionLogData.verified_content_count = response.sourceQuality?.verifiedContentCount || 0;
+      questionLogData.faq_content_count = response.sourceQuality?.faqContentCount || 0;
+      questionLogData.module_doc_count = response.sourceQuality?.moduleDocCount || 0;
+
+      // Log the question
+      await logQuestion(questionLogData);
+      
       return NextResponse.json({
         ...response,
         query,
@@ -216,6 +368,18 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error('RAG query error:', error);
+    
+    // Log error case
+    const endTime = performance.now();
+    questionLogData.response_time_ms = Math.round(endTime - startTime);
+    questionLogData.source_quality_score = 'Error occurred';
+    questionLogData.model_used = 'error';
+    try {
+      await logQuestion(questionLogData);
+    } catch (logError) {
+      console.error('Failed to log error question:', logError);
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error during query processing' },
       { status: 500 }
