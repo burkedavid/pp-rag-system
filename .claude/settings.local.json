@@ -32,9 +32,24 @@
       "WebFetch(domain:pp-idoxqa-automation.staging.idoxcloud.com)",
       "Bash(wc:*)",
       "Bash(cut:*)",
-      "Bash(ss:*)"
+      "Bash(ss:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(npx @playwright/mcp@latest:*)",
+      "Bash(env)",
+      "Bash(npx playwright:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(sudo npx playwright:*)",
+      "Bash(chmod:*)",
+      "Bash(docker:*)",
+      "Bash(./scripts/run-with-docker.sh:*)",
+      "Bash(npm run navigation:cleanup:*)",
+      "Bash(npm run navigation:test:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "/tmp"
+    ]
   }
 }

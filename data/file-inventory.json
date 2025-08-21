@@ -1,0 +1,306 @@
+{
+  "timestamp": "2025-08-20T14:50:23.364Z",
+  "directories": {
+    "scripts/navigation-system/extract": {
+      "fileCount": 2,
+      "totalSize": 34487,
+      "files": [
+        {
+          "name": "playwright-extractor.js",
+          "size": 25987,
+          "modified": "2025-08-20T14:21:58.695Z"
+        },
+        {
+          "name": "simple-extractor.js",
+          "size": 8500,
+          "modified": "2025-08-20T13:39:02.387Z"
+        }
+      ]
+    },
+    "scripts/navigation-system/pipeline": {
+      "fileCount": 1,
+      "totalSize": 6244,
+      "files": [
+        {
+          "name": "full-update.js",
+          "size": 6244,
+          "modified": "2025-08-20T14:49:17.285Z"
+        }
+      ]
+    },
+    "scripts/navigation-system/process": {
+      "fileCount": 2,
+      "totalSize": 25210,
+      "files": [
+        {
+          "name": "create-visual-guides.js",
+          "size": 13732,
+          "modified": "2025-08-20T14:42:43.075Z"
+        },
+        {
+          "name": "ingest-navigation.js",
+          "size": 11478,
+          "modified": "2025-08-20T14:31:20.933Z"
+        }
+      ]
+    },
+    "scripts/navigation-system/test": {
+      "fileCount": 3,
+      "totalSize": 15753,
+      "files": [
+        {
+          "name": "test-navigation-responses.js",
+          "size": 9782,
+          "modified": "2025-08-20T13:21:46.702Z"
+        },
+        {
+          "name": "test-quick.js",
+          "size": 2855,
+          "modified": "2025-08-20T14:32:55.365Z"
+        },
+        {
+          "name": "test-targeted.js",
+          "size": 3116,
+          "modified": "2025-08-20T14:34:55.304Z"
+        }
+      ]
+    },
+    "scripts/navigation-system/utils": {
+      "fileCount": 2,
+      "totalSize": 8599,
+      "files": [
+        {
+          "name": "check-db-content.js",
+          "size": 1733,
+          "modified": "2025-08-20T14:34:34.190Z"
+        },
+        {
+          "name": "cleanup.js",
+          "size": 6866,
+          "modified": "2025-08-20T14:49:45.302Z"
+        }
+      ]
+    },
+    "scripts/navigation-system": {
+      "fileCount": 11,
+      "totalSize": 93884,
+      "files": [
+        {
+          "name": "README.md",
+          "size": 3591,
+          "modified": "2025-08-20T14:48:12.548Z"
+        }
+      ]
+    },
+    "data/backup/2025-08-20/navigation-guides": {
+      "fileCount": 5,
+      "totalSize": 497037,
+      "files": [
+        {
+          "name": "Idox-Navigation-Verified.md",
+          "size": 19783,
+          "modified": "2025-08-20T14:48:51.530Z"
+        },
+        {
+          "name": "Manual-Documentation-Template.md",
+          "size": 5641,
+          "modified": "2025-08-20T14:48:51.694Z"
+        },
+        {
+          "name": "Navigation-Standards.md",
+          "size": 4796,
+          "modified": "2025-08-20T14:48:51.741Z"
+        },
+        {
+          "name": "Simple-Navigation-Analysis.md",
+          "size": 1487,
+          "modified": "2025-08-20T14:48:51.653Z"
+        },
+        {
+          "name": "navigation-data.json",
+          "size": 465330,
+          "modified": "2025-08-20T14:48:51.604Z"
+        }
+      ]
+    },
+    "data/backup/2025-08-20/screenshots": {
+      "fileCount": 27,
+      "totalSize": 3639930,
+      "files": [
+        {
+          "name": "00-login-page.png",
+          "size": 37555,
+          "modified": "2025-08-20T14:48:50.835Z"
+        },
+        {
+          "name": "01-logged-in.png",
+          "size": 87876,
+          "modified": "2025-08-20T14:48:50.882Z"
+        },
+        {
+          "name": "login-page-source.html",
+          "size": 6630,
+          "modified": "2025-08-20T14:48:51.221Z"
+        },
+        {
+          "name": "module-accidents.png",
+          "size": 104908,
+          "modified": "2025-08-20T14:48:50.441Z"
+        },
+        {
+          "name": "module-admin.png",
+          "size": 86278,
+          "modified": "2025-08-20T14:48:50.632Z"
+        },
+        {
+          "name": "module-audit-trail.png",
+          "size": 70140,
+          "modified": "2025-08-20T14:48:50.683Z"
+        },
+        {
+          "name": "module-bookings.png",
+          "size": 106856,
+          "modified": "2025-08-20T14:48:50.597Z"
+        },
+        {
+          "name": "module-comms-admin.png",
+          "size": 63911,
+          "modified": "2025-08-20T14:48:50.810Z"
+        },
+        {
+          "name": "module-contacts.png",
+          "size": 96283,
+          "modified": "2025-08-20T14:48:50.768Z"
+        },
+        {
+          "name": "module-dogs.png",
+          "size": 101936,
+          "modified": "2025-08-20T14:48:51.190Z"
+        }
+      ]
+    },
+    "data/processed/navigation-guides": {
+      "fileCount": 5,
+      "totalSize": 497037,
+      "files": [
+        {
+          "name": "Idox-Navigation-Verified.md",
+          "size": 19783,
+          "modified": "2025-08-20T14:28:04.753Z"
+        },
+        {
+          "name": "Manual-Documentation-Template.md",
+          "size": 5641,
+          "modified": "2025-08-20T13:17:11.178Z"
+        },
+        {
+          "name": "Navigation-Standards.md",
+          "size": 4796,
+          "modified": "2025-08-20T13:17:40.315Z"
+        },
+        {
+          "name": "Simple-Navigation-Analysis.md",
+          "size": 1487,
+          "modified": "2025-08-20T14:19:06.855Z"
+        },
+        {
+          "name": "navigation-data.json",
+          "size": 465330,
+          "modified": "2025-08-20T14:28:04.730Z"
+        }
+      ]
+    },
+    "data/raw/screenshots/debug": {
+      "fileCount": 2,
+      "totalSize": 452334,
+      "files": [
+        {
+          "name": "01-logged-in.png",
+          "size": 87876,
+          "modified": "2025-08-20T14:24:27.868Z"
+        },
+        {
+          "name": "page-source.html",
+          "size": 364458,
+          "modified": "2025-08-20T14:24:33.520Z"
+        }
+      ]
+    },
+    "data/raw/screenshots/login": {
+      "fileCount": 2,
+      "totalSize": 44185,
+      "files": [
+        {
+          "name": "00-login-page.png",
+          "size": 37555,
+          "modified": "2025-08-20T14:23:51.618Z"
+        },
+        {
+          "name": "login-page-source.html",
+          "size": 6630,
+          "modified": "2025-08-20T14:19:06.791Z"
+        }
+      ]
+    },
+    "data/raw/screenshots/modules": {
+      "fileCount": 23,
+      "totalSize": 3143411,
+      "files": [
+        {
+          "name": "module-accidents.png",
+          "size": 104908,
+          "modified": "2025-08-20T14:25:00.455Z"
+        },
+        {
+          "name": "module-admin.png",
+          "size": 86278,
+          "modified": "2025-08-20T14:26:18.940Z"
+        },
+        {
+          "name": "module-audit-trail.png",
+          "size": 70140,
+          "modified": "2025-08-20T14:26:57.492Z"
+        },
+        {
+          "name": "module-bookings.png",
+          "size": 106856,
+          "modified": "2025-08-20T14:26:12.277Z"
+        },
+        {
+          "name": "module-comms-admin.png",
+          "size": 63911,
+          "modified": "2025-08-20T14:26:15.483Z"
+        },
+        {
+          "name": "module-contacts.png",
+          "size": 96283,
+          "modified": "2025-08-20T14:25:33.407Z"
+        },
+        {
+          "name": "module-dogs.png",
+          "size": 101936,
+          "modified": "2025-08-20T14:25:57.183Z"
+        },
+        {
+          "name": "module-food-poisoning.png",
+          "size": 116006,
+          "modified": "2025-08-20T14:25:19.346Z"
+        },
+        {
+          "name": "module-gis.png",
+          "size": 607091,
+          "modified": "2025-08-20T14:25:38.729Z"
+        },
+        {
+          "name": "module-grants.png",
+          "size": 196696,
+          "modified": "2025-08-20T14:25:52.383Z"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "totalFiles": 85,
+    "totalSize": 8458111
+  }
+}
