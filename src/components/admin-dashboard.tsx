@@ -58,6 +58,7 @@ interface Question {
   faq_content_count: number;
   module_doc_count: number;
   model_used: string;
+  ip_address: string;
 }
 
 export default function AdminDashboard() {
@@ -569,20 +570,35 @@ export default function AdminDashboard() {
                         </div>
                         <p className="text-slate-800 font-medium mb-1 truncate pr-4">{question.query}</p>
                         <div className="flex items-center gap-3 text-xs text-slate-500">
-                          <span>📄 {question.sources_count}</span>
-                          <span>📋 {question.how_to_guide_count}</span>
-                          <span>✅ {question.verified_content_count}</span>
-                          <span>❓ {question.faq_content_count}</span>
-                          <span>📚 {question.module_doc_count}</span>
+                          <span title="Total Sources: Number of documentation sources found for this query" className="hover:text-slate-700 cursor-help">
+                            📄 {question.sources_count}
+                          </span>
+                          <span title="How-To Guides: Step-by-step procedural guides found (high quality content)" className="hover:text-slate-700 cursor-help">
+                            📋 {question.how_to_guide_count}
+                          </span>
+                          <span title="Verified Content: Officially verified documentation sources" className="hover:text-slate-700 cursor-help">
+                            ✅ {question.verified_content_count}
+                          </span>
+                          <span title="FAQ Content: Frequently Asked Questions documentation found" className="hover:text-slate-700 cursor-help">
+                            ❓ {question.faq_content_count}
+                          </span>
+                          <span title="Module Documentation: Technical module documentation sources" className="hover:text-slate-700 cursor-help">
+                            📚 {question.module_doc_count}
+                          </span>
                           <span className="text-slate-400">|</span>
-                          <span>{question.model_used.includes('claude') ? 'Claude 4.0' : 'Fallback'}</span>
+                          <span title="AI Model: The AI model used to generate this response" className="hover:text-slate-700 cursor-help">
+                            {question.model_used.includes('claude') ? 'Claude 4.0' : 'Fallback'}
+                          </span>
                         </div>
                       </div>
                       
-                      {/* Timestamp */}
+                      {/* Timestamp & IP */}
                       <div className="text-right text-xs text-slate-500 whitespace-nowrap">
                         <div>{new Date(question.timestamp).toLocaleDateString()}</div>
                         <div>{new Date(question.timestamp).toLocaleTimeString()}</div>
+                        <div title={`User IP Address: ${question.ip_address}`} className="text-slate-400 font-mono cursor-help hover:text-slate-600">
+                          {question.ip_address}
+                        </div>
                       </div>
                     </div>
                   </div>
