@@ -48,7 +48,12 @@
       "Bash(find:*)",
       "Bash(kill:*)",
       "Bash(fuser:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(echo $SHELL)",
+      "Bash(echo $PATH)",
+      "Bash(source ~/.bashrc)",
+      "Bash(claude --version)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": [],

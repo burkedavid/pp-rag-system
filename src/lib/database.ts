@@ -158,7 +158,7 @@ export async function hybridSearch(
         1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) as similarity,
         0.7 as weight
       FROM document_chunks
-      WHERE 1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) > 0.3
+      WHERE 1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) > 0.1
     ),
     keyword_search AS (
       SELECT 

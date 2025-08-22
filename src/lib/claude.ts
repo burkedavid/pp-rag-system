@@ -216,7 +216,8 @@ Answer:`;
     let confidence: 'high' | 'medium' | 'low' = 'low';
     
     // STRICT Anti-Hallucination Confidence Scoring
-    const qualitySourceCount = howToGuideCount + verifiedContentCount + moduleDocCount;
+    // Include FAQ content as quality sources since they contain detailed procedural information
+    const qualitySourceCount = howToGuideCount + verifiedContentCount + moduleDocCount + faqContentCount;
     
     // CRITICAL: Prevent hallucination with strict similarity thresholds
     if (maxSimilarity < 0.7) {
@@ -253,9 +254,12 @@ Answer:`;
       howToGuideCount >= 1 && verifiedContentCount >= 1 ? 'Verified procedural guidance' :
       howToGuideCount >= 2 ? 'Step-by-step procedural guidance' :
       verifiedContentCount >= 1 ? 'Interface-focused guidance' :
+      faqContentCount >= 2 && moduleDocCount >= 1 ? 'Detailed FAQ guidance with module documentation' :
+      faqContentCount >= 2 ? 'Comprehensive FAQ-based procedural guidance' :
+      faqContentCount >= 1 && moduleDocCount >= 1 ? 'FAQ guidance with module documentation' :
       howToGuideCount >= 1 && moduleDocCount >= 1 ? 'Procedural with module documentation' :
       moduleDocCount >= 2 ? 'Module documentation guidance' :
-      faqContentCount >= 2 ? 'Scenario-based guidance with common variations' :
+      faqContentCount >= 1 ? 'FAQ-based procedural guidance' :
       moduleDocCount >= 1 ? 'Official module documentation' :
       'General system guidance';
 
