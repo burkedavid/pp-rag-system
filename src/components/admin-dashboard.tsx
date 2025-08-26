@@ -8,13 +8,14 @@ import {
   BarChart3, TrendingUp, AlertTriangle, Clock, Search, Users, 
   CheckCircle, AlertCircle, XCircle, Filter, Download, Eye,
   ArrowUp, ArrowDown, Minus, Activity, Database, Bot, Home,
-  Upload, Settings
+  Upload, Settings, HardDrive
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import DocumentTypeSelector, { DocumentType } from '@/components/rag/DocumentTypeSelector';
 import FileUploader from '@/components/rag/FileUploader';
 import IngestionControls from '@/components/rag/IngestionControls';
 import ProgressMonitor from '@/components/rag/ProgressMonitor';
+import EmbeddingsManager from '@/components/admin/EmbeddingsManager';
 
 interface AnalyticsData {
   analytics: {
@@ -100,7 +101,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [confidenceFilter, setConfidenceFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'questions' | 'improvements' | 'rag-management'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'questions' | 'improvements' | 'rag-management' | 'embeddings'>('overview');
   const [dateRange, setDateRange] = useState(30);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalQuestions, setTotalQuestions] = useState(0);
@@ -457,7 +458,8 @@ export default function AdminDashboard() {
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'questions', label: 'Questions Log', icon: Database },
             { id: 'improvements', label: 'Improvements', icon: AlertTriangle },
-            { id: 'rag-management', label: 'RAG Management', icon: Upload }
+            { id: 'rag-management', label: 'RAG Management', icon: Upload },
+            { id: 'embeddings', label: 'Embeddings', icon: HardDrive }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1014,6 +1016,11 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Embeddings Management Tab */}
+        {selectedTab === 'embeddings' && (
+          <EmbeddingsManager />
         )}
       </div>
     </div>
