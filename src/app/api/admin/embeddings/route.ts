@@ -74,7 +74,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Chunk deleted successfully',
-        deletedCount: result.count
+        deletedCount: result.rowCount || 0
       });
       
     } else if (body.sourceFile) {
@@ -87,7 +87,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: `All chunks for "${body.sourceFile}" deleted successfully`,
-        deletedCount: result.count
+        deletedCount: result.rowCount || 0
       });
       
     } else {
