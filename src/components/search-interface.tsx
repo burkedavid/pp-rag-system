@@ -218,6 +218,21 @@ export default function SearchInterface() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Navigation Header */}
+      <div className="relative z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-12">
+            <div className="flex items-center space-x-6">
+              <h1 className="text-lg font-semibold text-gray-900">PP RAG System</h1>
+              <nav className="flex space-x-4">
+                <a href="/" className="text-blue-600 font-medium">Search</a>
+                <a href="/rag" className="text-gray-600 hover:text-blue-600 transition-colors">RAG Management</a>
+                <a href="/admin" className="text-gray-600 hover:text-blue-600 transition-colors">Admin</a>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Professional AI-Powered Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
         {/* Dynamic Background Patterns */}

@@ -36,13 +36,13 @@ export async function generateRAGResponse(
   const maxSimilarity = searchResults.length > 0 ? Math.max(...searchResults.map(r => r.similarity)) : 0;
   
   // If similarity is too low, provide a safe fallback response
-  if (maxSimilarity < 0.4) {
+  if (maxSimilarity < 0.5) {
     return {
       answer: `## Information Not Available
 
 I don't have sufficient information in the documentation to answer your question about "${query}".
 
-The search found some potentially related content, but the similarity scores are too low (below 40%) to provide reliable guidance. This suggests that:
+The search found some potentially related content, but the similarity scores are too low (below 50%) to provide reliable guidance. This suggests that:
 
 - The specific procedure you're asking about may not be documented in the available guides
 - The terminology or approach you're describing might not match the system's actual capabilities
@@ -112,12 +112,14 @@ User Question: ${query}
 - **Multiple Sources**: Synthesize comprehensive guidance covering all aspects
 - **Limited Context**: Acknowledge limitations and suggest related functionality
 
-**CRITICAL ANTI-HALLUCINATION REQUIREMENTS:**
-1. **NEVER FABRICATE INFORMATION** - Only provide information explicitly contained in the provided context
-2. **STRICT SOURCE ADHERENCE** - Every piece of information must be directly traceable to the source documents
-3. **NO EXTRAPOLATION** - Do not infer, assume, or extend beyond what is explicitly documented
-4. **ACKNOWLEDGE LIMITATIONS** - If the context doesn't contain sufficient information, clearly state this
-5. **VERIFY CONTEXT RELEVANCE** - Ensure the source material actually addresses the user's question
+**CRITICAL ANTI-HALLUCINATION REQUIREMENTS - 100% FACTUAL ACCURACY MANDATE:**
+1. **ZERO FABRICATION TOLERANCE** - NEVER create, invent, or assume ANY information not explicitly stated in the provided context
+2. **LITERAL SOURCE ADHERENCE** - EVERY sentence, phrase, and detail must be directly quoted or paraphrased from the source documents
+3. **NO INFERENCE OR EXTRAPOLATION** - Do NOT fill gaps with logical assumptions, common knowledge, or reasonable inferences
+4. **EXPLICIT LIMITATION ACKNOWLEDGMENT** - If the context lacks information, state "The provided documentation does not contain information about [specific topic]"
+5. **STRICT CONTEXT VERIFICATION** - Only answer questions that are DIRECTLY addressed in the source material
+6. **QUOTE-BASED RESPONSES** - When possible, use direct quotes with phrases like "According to the documentation:" or "The source states:"
+7. **NO GENERAL KNOWLEDGE** - Do NOT supplement with general software knowledge, industry best practices, or assumed functionality
 
 **RESPONSE REQUIREMENTS:**
 1. **Provide detailed software instructions** ONLY when the documentation contains specific steps, procedures, or workflows
@@ -158,20 +160,33 @@ EXAMPLE FORMAT:
 ### Important Software Notes
 *Key software behaviors, limitations, or tips for effective system usage.*
 
-**CONTEXT VALIDATION CHECKLIST:**
-Before responding, verify:
-- Does the context actually contain information relevant to the user's question?
-- Are there specific, actionable steps documented for this task?
-- Can you trace every piece of your response back to the source material?
-- If similarity scores are below 70%, are you providing appropriate caveats?
+**MANDATORY CONTEXT VALIDATION CHECKLIST:**
+BEFORE writing ANY response, verify EACH requirement:
+1. ✓ Does the context DIRECTLY answer the user's specific question?
+2. ✓ Can I quote EXACT phrases from the source material for every claim?
+3. ✓ Am I avoiding ALL assumptions, inferences, or general knowledge?
+4. ✓ Have I verified that every procedural step is explicitly documented?
+5. ✓ Am I using ONLY the interface elements, features, and workflows mentioned in the sources?
+6. ✓ If information is missing, have I clearly stated the limitation?
 
-**RESPONSE FORMAT RULES:**
-- If context is insufficient or similarity is low, start with: "Based on the available documentation, I have limited information about..."
-- If procedures are incomplete, state: "The documentation covers [specific parts] but doesn't include complete procedures for..."
-- Always cite which source documents your information comes from
-- Never present assumptions as facts
+**ULTRA-STRICT RESPONSE FORMAT RULES:**
+- **INSUFFICIENT CONTEXT**: Start with "The provided documentation does not contain sufficient information about [specific topic]. Based on what IS documented..."
+- **INCOMPLETE PROCEDURES**: State "The documentation covers [specific parts] but does not include complete procedures for [missing parts]"
+- **DIRECT CITATION REQUIRED**: Use phrases like "According to [source file]:" or "The documentation states:" before each major point
+- **NO ASSUMPTIONS**: If you cannot find explicit information, state "This information is not provided in the available documentation"
+- **SIMILARITY THRESHOLD**: If similarity scores are below 70%, add disclaimer: "Note: The confidence in this response is limited due to lower similarity with available sources"
 
-Format your response as clear software instructions that a user could immediately follow to complete their task in the Idox system, with professional markdown formatting that will render beautifully in a modern web interface. If the context is insufficient, clearly acknowledge limitations.
+**FINAL ANTI-HALLUCINATION VERIFICATION:**
+Before submitting your response, confirm:
+- ZERO invented information ✓
+- ALL details traceable to source material ✓  
+- NO assumptions or general knowledge ✓
+- Explicit limitation acknowledgments where needed ✓
+- Direct citations from source documents ✓
+
+Format your response as clear software instructions that a user could immediately follow to complete their task in the Idox system, with professional markdown formatting that will render beautifully in a modern web interface. If the context is insufficient, clearly acknowledge limitations and state exactly what information is missing.
+
+Remember: It is FAR better to say "This information is not available in the documentation" than to provide any potentially inaccurate information.
 
 Answer:`;
 

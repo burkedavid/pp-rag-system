@@ -7,9 +7,14 @@ import { Input } from '@/components/ui/input';
 import { 
   BarChart3, TrendingUp, AlertTriangle, Clock, Search, Users, 
   CheckCircle, AlertCircle, XCircle, Filter, Download, Eye,
-  ArrowUp, ArrowDown, Minus, Activity, Database, Bot, Home
+  ArrowUp, ArrowDown, Minus, Activity, Database, Bot, Home,
+  Upload, Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import DocumentTypeSelector, { DocumentType } from '@/components/rag/DocumentTypeSelector';
+import FileUploader from '@/components/rag/FileUploader';
+import IngestionControls from '@/components/rag/IngestionControls';
+import ProgressMonitor from '@/components/rag/ProgressMonitor';
 
 interface AnalyticsData {
   analytics: {
@@ -61,17 +66,57 @@ interface Question {
   ip_address: string;
 }
 
+// RAG Management interfaces
+interface UploadedFile {
+  originalName: string;
+  fileName: string;
+  size: number;
+  type: string;
+  path: string;
+}
+
+interface RAGStats {
+  total: {
+    total_chunks: number;
+    total_files: number;
+    total_tokens: number;
+  };
+  byType: Array<{
+    document_type: string;
+    chunk_count: number;
+    file_count: number;
+    avg_token_count: number;
+    last_updated: string;
+  }>;
+  confidence: Array<{
+    confidence: string;
+    count: number;
+  }>;
+}
+
 export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [confidenceFilter, setConfidenceFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'questions' | 'improvements'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'questions' | 'improvements' | 'rag-management'>('overview');
   const [dateRange, setDateRange] = useState(30);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [questionsPerPage] = useState(50);
+
+  // RAG Management state
+  const [selectedDocumentType, setSelectedDocumentType] = useState<DocumentType | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [isIngesting, setIsIngesting] = useState(false);
+  const [ragStats, setRagStats] = useState<RAGStats | null>(null);
+  const [ragNotifications, setRagNotifications] = useState<Array<{
+    id: string;
+    type: 'success' | 'error' | 'info';
+    message: string;
+  }>>([]);
 
   useEffect(() => {
     loadAnalytics();
@@ -80,6 +125,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadQuestions();
   }, [currentPage, searchTerm, confidenceFilter]);
+
+  useEffect(() => {
+    if (selectedTab === 'rag-management') {
+      fetchRagStats();
+    }
+  }, [selectedTab]);
 
   const loadAnalytics = async () => {
     try {
@@ -134,6 +185,109 @@ export default function AdminDashboard() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  // RAG Management functions
+  const fetchRagStats = async () => {
+    try {
+      const response = await fetch('/api/rag/status');
+      if (response.ok) {
+        const data = await response.json();
+        setRagStats(data.stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch RAG stats:', error);
+    }
+  };
+
+  const addRagNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    const id = Date.now().toString();
+    setRagNotifications(prev => [...prev, { id, type, message }]);
+    
+    setTimeout(() => {
+      setRagNotifications(prev => prev.filter(n => n.id !== id));
+    }, 5000);
+  };
+
+  const removeRagNotification = (id: string) => {
+    setRagNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const handleDocumentTypeSelect = (type: DocumentType) => {
+    setSelectedDocumentType(type);
+    setUploadedFiles([]);
+  };
+
+  const handleUploadComplete = (files: UploadedFile[]) => {
+    setUploadedFiles(files);
+    addRagNotification('success', `Successfully uploaded ${files.length} file(s)`);
+  };
+
+  const handleUploadError = (error: string) => {
+    addRagNotification('error', `Upload failed: ${error}`);
+  };
+
+  const handleStartIngestion = async (options: any) => {
+    if (!selectedDocumentType) {
+      addRagNotification('error', 'Please select a document type');
+      return;
+    }
+
+    try {
+      setIsIngesting(true);
+      
+      const response = await fetch('/api/rag/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentType: selectedDocumentType.id,
+          action: options.action,
+          files: uploadedFiles,
+          options
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setCurrentJobId(result.jobId);
+        addRagNotification('info', 'Ingestion started successfully');
+      } else {
+        throw new Error(result.error || 'Failed to start ingestion');
+      }
+    } catch (error) {
+      setIsIngesting(false);
+      addRagNotification('error', error instanceof Error ? error.message : 'Failed to start ingestion');
+    }
+  };
+
+  const handleStopIngestion = () => {
+    setCurrentJobId(null);
+    setIsIngesting(false);
+    addRagNotification('info', 'Ingestion stopped');
+  };
+
+  const handleIngestionComplete = () => {
+    setIsIngesting(false);
+    setCurrentJobId(null);
+    setUploadedFiles([]);
+    addRagNotification('success', 'Ingestion completed successfully!');
+    fetchRagStats();
+  };
+
+  const handleIngestionError = (error: string) => {
+    setIsIngesting(false);
+    setCurrentJobId(null);
+    addRagNotification('error', `Ingestion failed: ${error}`);
+  };
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat().format(num);
+  };
+
+  const getStatsForType = (typeId: string) => {
+    if (!ragStats) return null;
+    return ragStats.byType.find(t => t.document_type === typeId) || null;
   };
 
   const getConfidenceIcon = (confidence: string) => {
@@ -302,7 +456,8 @@ export default function AdminDashboard() {
           {[
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'questions', label: 'Questions Log', icon: Database },
-            { id: 'improvements', label: 'Improvements', icon: AlertTriangle }
+            { id: 'improvements', label: 'Improvements', icon: AlertTriangle },
+            { id: 'rag-management', label: 'RAG Management', icon: Upload }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -674,6 +829,191 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* RAG Management Tab */}
+        {selectedTab === 'rag-management' && (
+          <div className="space-y-6">
+            {/* RAG Notifications */}
+            {ragNotifications.length > 0 && (
+              <div className="space-y-2">
+                {ragNotifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`flex items-center justify-between p-4 rounded-lg border ${
+                      notification.type === 'success'
+                        ? 'bg-green-50 border-green-200 text-green-800'
+                        : notification.type === 'error'
+                        ? 'bg-red-50 border-red-200 text-red-800'
+                        : 'bg-blue-50 border-blue-200 text-blue-800'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      {notification.type === 'success' && <CheckCircle className="w-5 h-5" />}
+                      {notification.type === 'error' && <AlertCircle className="w-5 h-5" />}
+                      {notification.type === 'info' && <Activity className="w-5 h-5" />}
+                      <span className="text-sm font-medium">{notification.message}</span>
+                    </div>
+                    <button
+                      onClick={() => removeRagNotification(notification.id)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column - Configuration */}
+              <div className="lg:col-span-2 space-y-8">
+                
+                {/* Document Type Selection */}
+                <Card className="shadow-lg border-0 bg-white/95">
+                  <CardContent className="p-6">
+                    <DocumentTypeSelector
+                      selectedType={selectedDocumentType?.id || null}
+                      onTypeSelect={handleDocumentTypeSelect}
+                      stats={ragStats?.byType.reduce((acc, item) => {
+                        acc[item.document_type] = {
+                          chunkCount: item.chunk_count,
+                          lastUpdated: item.last_updated
+                        };
+                        return acc;
+                      }, {} as Record<string, any>)}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* File Upload */}
+                {selectedDocumentType && (
+                  <Card className="shadow-lg border-0 bg-white/95">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Upload className="h-5 w-5 text-blue-600" />
+                        Upload Files
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <FileUploader
+                        documentType={selectedDocumentType.id}
+                        onUploadComplete={handleUploadComplete}
+                        onUploadError={handleUploadError}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Ingestion Controls */}
+                {selectedDocumentType && (
+                  <Card className="shadow-lg border-0 bg-white/95">
+                    <CardContent className="p-6">
+                      <IngestionControls
+                        documentType={selectedDocumentType.id}
+                        uploadedFiles={uploadedFiles}
+                        onStartIngestion={handleStartIngestion}
+                        onStopIngestion={handleStopIngestion}
+                        isRunning={isIngesting}
+                        disabled={isIngesting}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Right Column - Status & Progress */}
+              <div className="space-y-6">
+                
+                {/* Current Stats */}
+                {ragStats && (
+                  <Card className="shadow-lg border-0 bg-white/95">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5 text-blue-600" />
+                        Content Overview
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-600">
+                              {formatNumber(ragStats.total.total_chunks)}
+                            </div>
+                            <div className="text-sm text-gray-600">Total Chunks</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-600">
+                              {formatNumber(ragStats.total.total_files)}
+                            </div>
+                            <div className="text-sm text-gray-600">Total Files</div>
+                          </div>
+                        </div>
+                        
+                        <div className="border-t pt-4">
+                          <h4 className="font-medium text-gray-900 mb-2">By Type</h4>
+                          <div className="space-y-2">
+                            {ragStats.byType.slice(0, 4).map((type) => (
+                              <div key={type.document_type} className="flex justify-between text-sm">
+                                <span className="text-gray-600 capitalize">
+                                  {type.document_type.replace('_', ' ')}
+                                </span>
+                                <span className="font-medium text-gray-900">
+                                  {formatNumber(type.chunk_count)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Progress Monitor */}
+                {currentJobId && (
+                  <ProgressMonitor
+                    jobId={currentJobId}
+                    onComplete={handleIngestionComplete}
+                    onError={handleIngestionError}
+                  />
+                )}
+
+                {/* Selected Type Info */}
+                {selectedDocumentType && (
+                  <Card className="shadow-lg border-0 bg-white/95">
+                    <CardHeader>
+                      <CardTitle>Selected Type Info</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Type:</span>
+                          <p className="text-sm text-gray-600">{selectedDocumentType.name}</p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Script:</span>
+                          <p className="text-xs font-mono text-gray-600 bg-gray-100 p-2 rounded">
+                            {selectedDocumentType.scriptPath}
+                          </p>
+                        </div>
+                        {getStatsForType(selectedDocumentType.id) && (
+                          <div>
+                            <span className="text-sm font-medium text-gray-700">Current Stats:</span>
+                            <div className="text-sm text-gray-600">
+                              {formatNumber(getStatsForType(selectedDocumentType.id)!.chunk_count)} chunks, {' '}
+                              {formatNumber(getStatsForType(selectedDocumentType.id)!.file_count)} files
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
