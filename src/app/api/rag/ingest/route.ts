@@ -18,44 +18,28 @@ async function updateJobStatus(jobId: string, updates: {
   error?: string;
   endTime?: Date;
 }) {
-  const updateFields = [];
-  const values = [];
-  
+  // Build individual update queries for each field
   if (updates.status !== undefined) {
-    updateFields.push('status = $' + (values.length + 1));
-    values.push(updates.status);
+    await sql`UPDATE ingestion_jobs SET status = ${updates.status} WHERE id = ${jobId}`;
   }
   if (updates.progress !== undefined) {
-    updateFields.push('progress = $' + (values.length + 1));
-    values.push(updates.progress);
+    await sql`UPDATE ingestion_jobs SET progress = ${updates.progress} WHERE id = ${jobId}`;
   }
   if (updates.processedFiles !== undefined) {
-    updateFields.push('processed_files = $' + (values.length + 1));
-    values.push(updates.processedFiles);
+    await sql`UPDATE ingestion_jobs SET processed_files = ${updates.processedFiles} WHERE id = ${jobId}`;
   }
   if (updates.currentFile !== undefined) {
-    updateFields.push('current_file = $' + (values.length + 1));
-    values.push(updates.currentFile);
+    await sql`UPDATE ingestion_jobs SET current_file = ${updates.currentFile} WHERE id = ${jobId}`;
   }
   if (updates.logs !== undefined) {
-    updateFields.push('logs = $' + (values.length + 1));
-    values.push(JSON.stringify(updates.logs));
+    await sql`UPDATE ingestion_jobs SET logs = ${JSON.stringify(updates.logs)} WHERE id = ${jobId}`;
   }
   if (updates.error !== undefined) {
-    updateFields.push('error = $' + (values.length + 1));
-    values.push(updates.error);
+    await sql`UPDATE ingestion_jobs SET error = ${updates.error} WHERE id = ${jobId}`;
   }
   if (updates.endTime !== undefined) {
-    updateFields.push('end_time = $' + (values.length + 1));
-    values.push(updates.endTime.toISOString());
+    await sql`UPDATE ingestion_jobs SET end_time = ${updates.endTime.toISOString()} WHERE id = ${jobId}`;
   }
-  
-  if (updateFields.length === 0) return;
-  
-  const query = `UPDATE ingestion_jobs SET ${updateFields.join(', ')} WHERE id = $${values.length + 1}`;
-  values.push(jobId);
-  
-  await sql.unsafe(query, values);
 }
 
 export async function POST(request: NextRequest) {
