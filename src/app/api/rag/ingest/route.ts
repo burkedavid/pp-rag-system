@@ -87,15 +87,25 @@ export async function POST(request: NextRequest) {
       )
     `;
     
-    const job = {
+    const job: {
+      id: string;
+      type: string;
+      status: 'pending' | 'running' | 'completed' | 'failed';
+      progress: number;
+      totalFiles: number;
+      processedFiles: number;
+      startTime: Date;
+      logs: string[];
+      currentFile?: string;
+    } = {
       id: jobId,
       type: documentType,
-      status: 'pending' as const,
+      status: 'pending',
       progress: 0,
       totalFiles: shouldProcessOnlyUploadedFiles ? files.length : 0,
       processedFiles: 0,
       startTime: new Date(),
-      logs: [] as string[]
+      logs: []
     };
 
     if (shouldProcessSingleFiles) {
