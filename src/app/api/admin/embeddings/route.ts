@@ -66,28 +66,26 @@ export async function DELETE(request: NextRequest) {
     
     if (body.chunkId) {
       // Delete single chunk
-      const result = await sql`
+      await sql`
         DELETE FROM document_chunks 
         WHERE id = ${body.chunkId}
       `;
       
       return NextResponse.json({
         success: true,
-        message: 'Chunk deleted successfully',
-        deletedCount: result.rowCount || 0
+        message: 'Chunk deleted successfully'
       });
       
     } else if (body.sourceFile) {
       // Delete all chunks for a file
-      const result = await sql`
+      await sql`
         DELETE FROM document_chunks 
         WHERE source_file = ${body.sourceFile}
       `;
       
       return NextResponse.json({
         success: true,
-        message: `All chunks for "${body.sourceFile}" deleted successfully`,
-        deletedCount: result.rowCount || 0
+        message: `All chunks for "${body.sourceFile}" deleted successfully`
       });
       
     } else {
