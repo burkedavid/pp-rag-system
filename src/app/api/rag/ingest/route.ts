@@ -97,6 +97,8 @@ export async function POST(request: NextRequest) {
       startTime: Date;
       logs: string[];
       currentFile?: string;
+      endTime?: Date;
+      error?: string;
     } = {
       id: jobId,
       type: documentType,
