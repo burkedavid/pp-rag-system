@@ -53,7 +53,9 @@
       "Bash(echo $PATH)",
       "Bash(source ~/.bashrc)",
       "Bash(claude --version)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": [],
