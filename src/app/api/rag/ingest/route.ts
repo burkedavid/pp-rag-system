@@ -7,20 +7,56 @@ import { sql } from '@/lib/database';
 import { uploadedFilesStore, StoredFile } from '@/lib/file-storage';
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 
-// Store active ingestion jobs in memory (in production, use Redis or database)
-const activeJobs = new Map<string, {
-  id: string;
-  type: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  progress: number;
-  totalFiles: number;
-  processedFiles: number;
+// Jobs are now tracked in database for serverless compatibility
+
+async function updateJobStatus(jobId: string, updates: {
+  status?: 'pending' | 'running' | 'completed' | 'failed';
+  progress?: number;
+  processedFiles?: number;
   currentFile?: string;
-  startTime: Date;
-  endTime?: Date;
+  logs?: string[];
   error?: string;
-  logs: string[];
-}>();
+  endTime?: Date;
+}) {
+  const updateFields = [];
+  const values = [];
+  
+  if (updates.status !== undefined) {
+    updateFields.push('status = $' + (values.length + 1));
+    values.push(updates.status);
+  }
+  if (updates.progress !== undefined) {
+    updateFields.push('progress = $' + (values.length + 1));
+    values.push(updates.progress);
+  }
+  if (updates.processedFiles !== undefined) {
+    updateFields.push('processed_files = $' + (values.length + 1));
+    values.push(updates.processedFiles);
+  }
+  if (updates.currentFile !== undefined) {
+    updateFields.push('current_file = $' + (values.length + 1));
+    values.push(updates.currentFile);
+  }
+  if (updates.logs !== undefined) {
+    updateFields.push('logs = $' + (values.length + 1));
+    values.push(JSON.stringify(updates.logs));
+  }
+  if (updates.error !== undefined) {
+    updateFields.push('error = $' + (values.length + 1));
+    values.push(updates.error);
+  }
+  if (updates.endTime !== undefined) {
+    updateFields.push('end_time = $' + (values.length + 1));
+    values.push(updates.endTime.toISOString());
+  }
+  
+  if (updateFields.length === 0) return;
+  
+  const query = `UPDATE ingestion_jobs SET ${updateFields.join(', ')} WHERE id = $${values.length + 1}`;
+  values.push(jobId);
+  
+  await sql.unsafe(query, values);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,36 +91,34 @@ export async function POST(request: NextRequest) {
     const shouldProcessOnlyUploadedFiles = action === 'custom' && files && files.length > 0;
     const shouldProcessSingleFiles = shouldProcessOnlyUploadedFiles && singleFileScriptMap[documentType];
 
-    // Initialize job tracking
-    const job: {
-      id: string;
-      type: string;
-      status: 'pending' | 'running' | 'completed' | 'failed';
-      progress: number;
-      totalFiles: number;
-      processedFiles: number;
-      currentFile?: string;
-      startTime: Date;
-      endTime?: Date;
-      error?: string;
-      logs: string[];
-    } = {
+    // Initialize job in database
+    await sql`
+      INSERT INTO ingestion_jobs (
+        id, document_type, status, progress, total_files, processed_files, 
+        start_time, logs
+      ) VALUES (
+        ${jobId}, ${documentType}, 'pending', 0, 
+        ${shouldProcessOnlyUploadedFiles ? files.length : 0}, 0,
+        ${new Date().toISOString()}, ${JSON.stringify([])}
+      )
+    `;
+    
+    const job = {
       id: jobId,
       type: documentType,
-      status: 'pending',
+      status: 'pending' as const,
       progress: 0,
       totalFiles: shouldProcessOnlyUploadedFiles ? files.length : 0,
       processedFiles: 0,
       startTime: new Date(),
-      logs: []
+      logs: [] as string[]
     };
-    
-    activeJobs.set(jobId, job);
 
     if (shouldProcessSingleFiles) {
       // Process only the uploaded files using single-file ingestion
       job.logs.push(`Processing ${files.length} uploaded file(s) only`);
       job.status = 'running';
+      await updateJobStatus(jobId, { status: 'running', logs: job.logs });
       
       let processedCount = 0;
       let hasError = false;
@@ -93,6 +127,7 @@ export async function POST(request: NextRequest) {
         try {
           job.currentFile = file.originalName;
           job.logs.push(`Processing: ${file.originalName}`);
+          await updateJobStatus(jobId, { currentFile: file.originalName, logs: job.logs });
           
           // Get file from memory store
           const fileId = file.path; // path is actually the fileId for memory storage
@@ -118,6 +153,11 @@ export async function POST(request: NextRequest) {
           job.processedFiles = processedCount;
           job.progress = Math.round((processedCount / files.length) * 100);
           job.logs.push(`✅ Completed: ${file.originalName}`);
+          await updateJobStatus(jobId, { 
+            processedFiles: processedCount, 
+            progress: job.progress, 
+            logs: job.logs 
+          });
           
           // Clean up from memory store
           uploadedFilesStore.delete(fileId);
@@ -125,18 +165,26 @@ export async function POST(request: NextRequest) {
         } catch (error) {
           hasError = true;
           job.logs.push(`❌ Error processing ${file.originalName}: ${error}`);
+          await updateJobStatus(jobId, { logs: job.logs });
         }
       }
       
       // Update final job status
-      job.endTime = new Date();
+      const endTime = new Date();
       if (hasError) {
-        job.status = 'failed';
-        job.error = 'One or more files failed to process';
+        await updateJobStatus(jobId, { 
+          status: 'failed', 
+          error: 'One or more files failed to process',
+          endTime 
+        });
       } else {
-        job.status = 'completed';
-        job.progress = 100;
         job.logs.push('✅ All uploaded files processed successfully');
+        await updateJobStatus(jobId, { 
+          status: 'completed', 
+          progress: 100, 
+          logs: job.logs,
+          endTime 
+        });
       }
       
     } else {
@@ -223,22 +271,61 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const jobId = searchParams.get('jobId');
   
-  if (!jobId) {
-    // Return all active jobs
+  try {
+    if (!jobId) {
+      // Return all recent jobs
+      const jobs = await sql`
+        SELECT id, document_type as type, status, progress, total_files, 
+               processed_files, current_file, start_time, end_time, error, logs
+        FROM ingestion_jobs 
+        WHERE start_time > NOW() - INTERVAL '1 hour'
+        ORDER BY start_time DESC
+      `;
+      
+      return NextResponse.json({
+        jobs: jobs.map(job => ({
+          ...job,
+          startTime: new Date(job.start_time),
+          endTime: job.end_time ? new Date(job.end_time) : undefined,
+          logs: JSON.parse(job.logs || '[]'),
+          totalFiles: job.total_files,
+          processedFiles: job.processed_files,
+          currentFile: job.current_file
+        }))
+      });
+    }
+    
+    const jobResult = await sql`
+      SELECT id, document_type as type, status, progress, total_files, 
+             processed_files, current_file, start_time, end_time, error, logs
+      FROM ingestion_jobs 
+      WHERE id = ${jobId}
+    `;
+    
+    if (jobResult.length === 0) {
+      return NextResponse.json(
+        { error: 'Job not found' },
+        { status: 404 }
+      );
+    }
+    
+    const job = jobResult[0];
     return NextResponse.json({
-      jobs: Array.from(activeJobs.values())
+      ...job,
+      startTime: new Date(job.start_time),
+      endTime: job.end_time ? new Date(job.end_time) : undefined,
+      logs: JSON.parse(job.logs || '[]'),
+      totalFiles: job.total_files,
+      processedFiles: job.processed_files,
+      currentFile: job.current_file
     });
-  }
-  
-  const job = activeJobs.get(jobId);
-  if (!job) {
+  } catch (error) {
+    console.error('Job status error:', error);
     return NextResponse.json(
-      { error: 'Job not found' },
-      { status: 404 }
+      { error: 'Failed to get job status' },
+      { status: 500 }
     );
   }
-  
-  return NextResponse.json(job);
 }
 
 // Direct file processing function for Vercel compatibility
