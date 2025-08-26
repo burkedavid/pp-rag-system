@@ -4,7 +4,8 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { sql } from '@/lib/database';
-import { uploadedFilesStore } from '@/lib/file-storage';
+import { uploadedFilesStore, StoredFile } from '@/lib/file-storage';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 
 // Store active ingestion jobs in memory (in production, use Redis or database)
 const activeJobs = new Map<string, {
@@ -110,48 +111,13 @@ export async function POST(request: NextRequest) {
           const tempFilePath = path.join(tempDir, `${fileId}-${file.originalName}`);
           await writeFile(tempFilePath, storedFile.content);
           
-          const singleFileScript = singleFileScriptMap[documentType];
-          const scriptFullPath = path.join(process.cwd(), singleFileScript);
+          // Process file directly using inline ingestion logic
+          await processFileDirectly(storedFile, documentType, job);
           
-          // Run single file ingestion synchronously
-          await new Promise<void>((resolve, reject) => {
-            const nodeProcess = spawn('node', [scriptFullPath, tempFilePath], {
-              cwd: process.cwd(),
-              env: { ...process.env }
-            });
-
-            let processOutput = '';
-            
-            nodeProcess.stdout.on('data', (data) => {
-              const output = data.toString();
-              processOutput += output;
-              job.logs.push(output.trim());
-            });
-
-            nodeProcess.stderr.on('data', (data) => {
-              const error = data.toString();
-              job.logs.push(`ERROR: ${error.trim()}`);
-            });
-
-            nodeProcess.on('close', (code) => {
-              // Clean up temp file
-              import('fs/promises').then(({ unlink }) => {
-                unlink(tempFilePath).catch(() => {}); // Ignore cleanup errors
-              });
-              
-              if (code === 0) {
-                processedCount++;
-                job.processedFiles = processedCount;
-                job.progress = Math.round((processedCount / files.length) * 100);
-                job.logs.push(`✅ Completed: ${file.originalName}`);
-                resolve();
-              } else {
-                hasError = true;
-                job.logs.push(`❌ Failed: ${file.originalName} (exit code: ${code})`);
-                reject(new Error(`Process failed with code ${code}`));
-              }
-            });
-          });
+          processedCount++;
+          job.processedFiles = processedCount;
+          job.progress = Math.round((processedCount / files.length) * 100);
+          job.logs.push(`✅ Completed: ${file.originalName}`);
           
           // Clean up from memory store
           uploadedFilesStore.delete(fileId);
@@ -273,4 +239,148 @@ export async function GET(request: NextRequest) {
   }
   
   return NextResponse.json(job);
+}
+
+// Direct file processing function for Vercel compatibility
+async function processFileDirectly(file: StoredFile, documentType: string, job: any) {
+  try {
+    job.logs.push(`Starting direct processing of ${file.originalName}`);
+    
+    // Initialize Bedrock client
+    const bedrockClient = new BedrockRuntimeClient({
+      region: process.env.AWS_REGION || 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
+    });
+    
+    // Extract text content from file
+    const content = file.content.toString('utf-8');
+    job.logs.push(`Extracted ${content.length} characters from file`);
+    
+    // Parse markdown content and extract topic area
+    const topicAreaMatch = content.match(/\*\*Topic Area:\*\*\s*(.+)/i);
+    const topicArea = topicAreaMatch ? topicAreaMatch[1].trim() : extractTopicFromFilename(file.originalName);
+    
+    job.logs.push(`Detected topic area: ${topicArea}`);
+    
+    // Clean and chunk the content
+    const cleanedContent = cleanMarkdownContent(content);
+    const chunks = createChunks(cleanedContent, 800, 100);
+    
+    job.logs.push(`Created ${chunks.length} chunks for processing`);
+    
+    // Process each chunk
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      job.logs.push(`Processing chunk ${i + 1}/${chunks.length}`);
+      
+      // Generate embedding
+      const embedding = await generateEmbedding(chunk.text, bedrockClient);
+      
+      // Store in database
+      await sql`
+        INSERT INTO embeddings_v2 (
+          content, 
+          embedding, 
+          document_type, 
+          source_file, 
+          chunk_index, 
+          token_count,
+          topic_area,
+          created_at
+        ) VALUES (
+          ${chunk.text},
+          ${JSON.stringify(embedding)},
+          ${documentType},
+          ${file.originalName},
+          ${i},
+          ${chunk.tokenCount},
+          ${topicArea},
+          ${new Date().toISOString()}
+        )
+      `;
+      
+      job.logs.push(`Stored chunk ${i + 1} in database`);
+    }
+    
+    job.logs.push(`✅ Successfully processed ${file.originalName} with ${chunks.length} chunks`);
+    
+  } catch (error) {
+    job.logs.push(`❌ Error processing ${file.originalName}: ${error}`);
+    throw error;
+  }
+}
+
+// Helper functions
+function extractTopicFromFilename(filename: string): string {
+  return filename
+    .replace(/\.md$/, '')
+    .replace(/-faq$/, '')
+    .replace(/-/g, '_')
+    .toLowerCase();
+}
+
+function cleanMarkdownContent(content: string): string {
+  return content
+    .replace(/^#+ /gm, '')  // Remove markdown headers
+    .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold formatting
+    .replace(/\*(.*?)\*/g, '$1')  // Remove italic formatting
+    .replace(/`(.*?)`/g, '$1')  // Remove code formatting
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // Remove links, keep text
+    .replace(/^\s*[-*+]\s/gm, '')  // Remove list markers
+    .replace(/\n{3,}/g, '\n\n')  // Normalize line breaks
+    .trim();
+}
+
+function createChunks(text: string, maxTokens: number, overlapTokens: number) {
+  const words = text.split(/\s+/);
+  const chunks = [];
+  const wordsPerToken = 4; // Rough estimate
+  const maxWords = maxTokens * wordsPerToken;
+  const overlapWords = overlapTokens * wordsPerToken;
+  
+  let startIndex = 0;
+  let chunkIndex = 0;
+  
+  while (startIndex < words.length) {
+    const endIndex = Math.min(startIndex + maxWords, words.length);
+    const chunkWords = words.slice(startIndex, endIndex);
+    const chunkText = chunkWords.join(' ');
+    
+    chunks.push({
+      text: chunkText,
+      tokenCount: Math.ceil(chunkWords.length / wordsPerToken),
+      index: chunkIndex++
+    });
+    
+    // Move start index, considering overlap
+    if (endIndex >= words.length) break;
+    startIndex = Math.max(startIndex + maxWords - overlapWords, startIndex + 1);
+  }
+  
+  return chunks;
+}
+
+async function generateEmbedding(text: string, bedrockClient: BedrockRuntimeClient): Promise<number[]> {
+  const maxLength = 25000;
+  const processedText = text.length > maxLength ? text.substring(0, maxLength) : text;
+  
+  const input = {
+    modelId: 'amazon.titan-embed-text-v2:0',
+    contentType: 'application/json',
+    accept: 'application/json',
+    body: JSON.stringify({
+      inputText: processedText,
+      dimensions: 1024,
+      normalize: true
+    }),
+  };
+
+  const command = new InvokeModelCommand(input);
+  const response = await bedrockClient.send(command);
+  
+  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+  return responseBody.embedding;
 }
