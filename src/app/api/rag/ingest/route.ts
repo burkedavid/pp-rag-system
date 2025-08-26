@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const job = {
       id: jobId,
       type: documentType,
-      status: 'pending' as const,
+      status: 'pending' as 'pending' | 'running' | 'completed' | 'failed',
       progress: 0,
       totalFiles: shouldProcessOnlyUploadedFiles ? files.length : 0,
       processedFiles: 0,
