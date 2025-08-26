@@ -9,6 +9,17 @@ import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedroc
 
 // Jobs are now tracked in database for serverless compatibility
 
+function safeParseJSON(value: any, fallback: any) {
+  if (!value) return fallback;
+  if (typeof value === 'object') return value;
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn('Failed to parse JSON:', value, error);
+    return fallback;
+  }
+}
+
 async function updateJobStatus(jobId: string, updates: {
   status?: 'pending' | 'running' | 'completed' | 'failed';
   progress?: number;
@@ -283,7 +294,7 @@ export async function GET(request: NextRequest) {
           ...job,
           startTime: new Date(job.start_time),
           endTime: job.end_time ? new Date(job.end_time) : undefined,
-          logs: JSON.parse(job.logs || '[]'),
+          logs: safeParseJSON(job.logs, []),
           totalFiles: job.total_files,
           processedFiles: job.processed_files,
           currentFile: job.current_file
@@ -310,7 +321,7 @@ export async function GET(request: NextRequest) {
       ...job,
       startTime: new Date(job.start_time),
       endTime: job.end_time ? new Date(job.end_time) : undefined,
-      logs: JSON.parse(job.logs || '[]'),
+      logs: safeParseJSON(job.logs, []),
       totalFiles: job.total_files,
       processedFiles: job.processed_files,
       currentFile: job.current_file
