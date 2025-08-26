@@ -259,9 +259,14 @@ async function processFileDirectly(file: StoredFile, documentType: string, job: 
     const content = file.content.toString('utf-8');
     job.logs.push(`Extracted ${content.length} characters from file`);
     
-    // Parse markdown content and extract topic area
-    const topicAreaMatch = content.match(/\*\*Topic Area:\*\*\s*(.+)/i);
-    const topicArea = topicAreaMatch ? topicAreaMatch[1].trim() : extractTopicFromFilename(file.originalName);
+    // Parse markdown content and extract topic area based on document type
+    let topicArea: string;
+    if (documentType === 'online-ba-questions') {
+      topicArea = determineOnlineBATopicArea(file.originalName);
+    } else {
+      const topicAreaMatch = content.match(/\*\*Topic Area:\*\*\s*(.+)/i);
+      topicArea = topicAreaMatch ? topicAreaMatch[1].trim() : extractTopicFromFilename(file.originalName);
+    }
     
     job.logs.push(`Detected topic area: ${topicArea}`);
     
@@ -320,6 +325,23 @@ function extractTopicFromFilename(filename: string): string {
     .replace(/-faq$/, '')
     .replace(/-/g, '_')
     .toLowerCase();
+}
+
+function determineOnlineBATopicArea(filename: string): string {
+  const lowerName = filename.toLowerCase().replace('-faq.md', '');
+  
+  if (lowerName.includes('automatic-matching-settings-configuration')) return 'matching_configuration_ba';
+  if (lowerName.includes('food-poisoning-additional-victims-complainants')) return 'food_poisoning_victims_ba';
+  if (lowerName.includes('gazetteer-address-integration')) return 'gazetteer_integration_ba';
+  if (lowerName.includes('online-request-premises-matching-fields')) return 'matching_fields_ba';
+  if (lowerName.includes('online-request-premises-matching-process')) return 'matching_process_ba';
+  if (lowerName.includes('premises-matching-online-service-requests')) return 'service_requests_matching_ba';
+  if (lowerName.includes('prosecution-outcome-information')) return 'prosecution_outcomes_ba';
+  if (lowerName.includes('system-complex-areas-user-confusion')) return 'user_confusion_ba';
+  if (lowerName.includes('notice-type-days-to-fees-due')) return 'notice_fees_due_ba';
+  if (lowerName.includes('trading-standards-cacs-citizens-advice')) return 'trading_standards_imports_ba';
+  
+  return 'online_ba_general';
 }
 
 function cleanMarkdownContent(content: string): string {
