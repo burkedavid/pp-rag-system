@@ -380,24 +380,29 @@ async function processFileDirectly(file: StoredFile, documentType: string, job: 
       
       // Store in database
       await sql`
-        INSERT INTO embeddings_v2 (
-          content, 
-          embedding, 
-          document_type, 
+        INSERT INTO document_chunks (
           source_file, 
+          section_title,
+          chunk_text, 
           chunk_index, 
           token_count,
-          topic_area,
-          created_at
+          embedding, 
+          metadata
         ) VALUES (
-          ${chunk.text},
-          ${JSON.stringify(embedding)},
-          ${documentType},
           ${file.originalName},
+          ${''},
+          ${chunk.text},
           ${i},
           ${chunk.tokenCount},
-          ${topicArea},
-          ${new Date().toISOString()}
+          ${JSON.stringify(embedding)},
+          ${JSON.stringify({
+            document_type: documentType,
+            topic_area: topicArea,
+            section_type: 'online_ba_content',
+            has_procedures: false,
+            subsection_count: 0,
+            complexity_level: 'intermediate'
+          })}
         )
       `;
       
