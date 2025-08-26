@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { spawn } from 'child_process';
+import { writeFile, mkdir } from 'fs/promises';
+import { existsSync } from 'fs';
 import path from 'path';
 import { sql } from '@/lib/database';
+import { uploadedFilesStore } from '@/lib/file-storage';
 
 // Store active ingestion jobs in memory (in production, use Redis or database)
 const activeJobs = new Map<string, {
@@ -90,12 +93,29 @@ export async function POST(request: NextRequest) {
           job.currentFile = file.originalName;
           job.logs.push(`Processing: ${file.originalName}`);
           
+          // Get file from memory store
+          const fileId = file.path; // path is actually the fileId for memory storage
+          const storedFile = uploadedFilesStore.get(fileId);
+          
+          if (!storedFile) {
+            throw new Error(`File not found in memory store: ${file.originalName}`);
+          }
+          
+          // Create temporary file for processing (in /tmp which is writable in Vercel)
+          const tempDir = '/tmp/rag-uploads';
+          if (!existsSync(tempDir)) {
+            await mkdir(tempDir, { recursive: true });
+          }
+          
+          const tempFilePath = path.join(tempDir, `${fileId}-${file.originalName}`);
+          await writeFile(tempFilePath, storedFile.content);
+          
           const singleFileScript = singleFileScriptMap[documentType];
           const scriptFullPath = path.join(process.cwd(), singleFileScript);
           
           // Run single file ingestion synchronously
           await new Promise<void>((resolve, reject) => {
-            const nodeProcess = spawn('node', [scriptFullPath, file.path], {
+            const nodeProcess = spawn('node', [scriptFullPath, tempFilePath], {
               cwd: process.cwd(),
               env: { ...process.env }
             });
@@ -114,6 +134,11 @@ export async function POST(request: NextRequest) {
             });
 
             nodeProcess.on('close', (code) => {
+              // Clean up temp file
+              import('fs/promises').then(({ unlink }) => {
+                unlink(tempFilePath).catch(() => {}); // Ignore cleanup errors
+              });
+              
               if (code === 0) {
                 processedCount++;
                 job.processedFiles = processedCount;
@@ -127,6 +152,9 @@ export async function POST(request: NextRequest) {
               }
             });
           });
+          
+          // Clean up from memory store
+          uploadedFilesStore.delete(fileId);
           
         } catch (error) {
           hasError = true;
