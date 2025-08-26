@@ -52,10 +52,22 @@ export async function POST(request: NextRequest) {
     const shouldProcessSingleFiles = shouldProcessOnlyUploadedFiles && singleFileScriptMap[documentType];
 
     // Initialize job tracking
-    const job = {
+    const job: {
+      id: string;
+      type: string;
+      status: 'pending' | 'running' | 'completed' | 'failed';
+      progress: number;
+      totalFiles: number;
+      processedFiles: number;
+      currentFile?: string;
+      startTime: Date;
+      endTime?: Date;
+      error?: string;
+      logs: string[];
+    } = {
       id: jobId,
       type: documentType,
-      status: 'pending' as 'pending' | 'running' | 'completed' | 'failed',
+      status: 'pending',
       progress: 0,
       totalFiles: shouldProcessOnlyUploadedFiles ? files.length : 0,
       processedFiles: 0,
