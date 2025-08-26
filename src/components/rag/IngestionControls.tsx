@@ -8,7 +8,8 @@ import {
   Settings,
   AlertTriangle,
   Info,
-  Zap
+  Zap,
+  CheckCircle
 } from 'lucide-react';
 
 interface IngestionOptions {
@@ -26,6 +27,7 @@ interface IngestionControlsProps {
   onStopIngestion: () => void;
   isRunning: boolean;
   disabled?: boolean;
+  recentlyCompleted?: boolean;
 }
 
 export default function IngestionControls({
@@ -34,7 +36,8 @@ export default function IngestionControls({
   onStartIngestion,
   onStopIngestion,
   isRunning,
-  disabled = false
+  disabled = false,
+  recentlyCompleted = false
 }: IngestionControlsProps) {
   const [options, setOptions] = useState<IngestionOptions>({
     action: 'incremental',
@@ -283,19 +286,33 @@ export default function IngestionControls({
             <button
               onClick={handleStartIngestion}
               disabled={!canStart}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ${
+                recentlyCompleted 
+                  ? 'text-white bg-green-600 hover:bg-green-700 focus:ring-green-500' 
+                  : 'text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+              }`}
             >
-              <Play className="w-4 h-4" />
-              <span>Start Ingestion</span>
+              {recentlyCompleted ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Completed Successfully</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  <span>Start Ingestion</span>
+                </>
+              )}
             </button>
           )}
         </div>
 
-        <div className="text-sm text-gray-500">
-          {!documentType && 'Select a document type to continue'}
-          {documentType && !uploadedFiles.length && options.action === 'custom' && 'Custom processing requires uploaded files - upload files first'}
-          {documentType && uploadedFiles.length > 0 && options.action === 'custom' && `Ready to process ${uploadedFiles.length} uploaded file(s) only`}
-          {documentType && isRunning && 'Ingestion in progress...'}
+        <div className={`text-sm transition-colors duration-300 ${recentlyCompleted ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
+          {recentlyCompleted && 'Content successfully embedded and searchable! 🎉'}
+          {!recentlyCompleted && !documentType && 'Select a document type to continue'}
+          {!recentlyCompleted && documentType && !uploadedFiles.length && options.action === 'custom' && 'Custom processing requires uploaded files - upload files first'}
+          {!recentlyCompleted && documentType && uploadedFiles.length > 0 && options.action === 'custom' && `Ready to process ${uploadedFiles.length} uploaded file(s) only`}
+          {!recentlyCompleted && documentType && isRunning && 'Ingestion in progress...'}
         </div>
       </div>
     </div>

@@ -112,6 +112,7 @@ export default function AdminDashboard() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [isIngesting, setIsIngesting] = useState(false);
+  const [recentlyCompleted, setRecentlyCompleted] = useState(false);
   const [ragStats, setRagStats] = useState<RAGStats | null>(null);
   const [ragNotifications, setRagNotifications] = useState<Array<{
     id: string;
@@ -272,8 +273,19 @@ export default function AdminDashboard() {
     setIsIngesting(false);
     setCurrentJobId(null);
     setUploadedFiles([]);
-    addRagNotification('success', 'Ingestion completed successfully!');
+    setRecentlyCompleted(true);
+    addRagNotification('success', '🎉 Ingestion completed successfully! Your content has been embedded and is now searchable.');
     fetchRagStats();
+    
+    // Show additional feedback and reset completion state
+    setTimeout(() => {
+      addRagNotification('info', '💡 Tip: Check the Embeddings tab to view and manage your processed content.');
+    }, 2000);
+    
+    // Reset the recently completed state after a few seconds
+    setTimeout(() => {
+      setRecentlyCompleted(false);
+    }, 5000);
   };
 
   const handleIngestionError = (error: string) => {
@@ -918,6 +930,7 @@ export default function AdminDashboard() {
                         onStopIngestion={handleStopIngestion}
                         isRunning={isIngesting}
                         disabled={isIngesting}
+                        recentlyCompleted={recentlyCompleted}
                       />
                     </CardContent>
                   </Card>
