@@ -241,7 +241,7 @@ async function processDocument(filePath) {
         has_procedures: containsProcedures(section.content),
         subsection_count: countSubsections(section.content),
         complexity_level: extractComplexityLevel(section.content, section.title),
-        document_type: 'online_ba_questions'
+        document_type: 'online-ba-questions'
       };
     });
     
@@ -425,7 +425,7 @@ async function ingestOnlineBAQuestions() {
       console.log('🗑️  Removing existing Online BA Questions...');
       const deleteResult = await sql`
         DELETE FROM document_chunks 
-        WHERE metadata->>'document_type' = 'online_ba_questions';
+        WHERE metadata->>'document_type' = 'online-ba-questions';
       `;
       console.log(`✅ Removed ${deleteResult.length} existing Online BA Questions chunks`);
     } else {
@@ -433,7 +433,7 @@ async function ingestOnlineBAQuestions() {
       const existingCount = await sql`
         SELECT COUNT(*) as count
         FROM document_chunks 
-        WHERE metadata->>'document_type' = 'online_ba_questions';
+        WHERE metadata->>'document_type' = 'online-ba-questions';
       `;
       console.log(`📊 Would remove ${existingCount[0].count} existing Online BA Questions chunks (dry run)`);
     }
@@ -511,7 +511,7 @@ async function ingestOnlineBAQuestions() {
           finalCount = await sql`
             SELECT COUNT(*) as count 
             FROM document_chunks 
-            WHERE metadata->>'document_type' = 'online_ba_questions';
+            WHERE metadata->>'document_type' = 'online-ba-questions';
           `;
           break;
         } catch (error) {
@@ -530,7 +530,7 @@ async function ingestOnlineBAQuestions() {
       fileBreakdown = await sql`
         SELECT source_file, COUNT(*) as chunk_count
         FROM document_chunks 
-        WHERE metadata->>'document_type' = 'online_ba_questions'
+        WHERE metadata->>'document_type' = 'online-ba-questions'
         GROUP BY source_file
         ORDER BY source_file;
       `;

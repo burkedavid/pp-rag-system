@@ -47,6 +47,7 @@ export default function EmbeddingsManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedFile, setSelectedFile] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
   const [deleting, setDeleting] = useState<Set<string>>(new Set());
   const [expandedChunk, setExpandedChunk] = useState<number | null>(null);
 
@@ -142,7 +143,36 @@ export default function EmbeddingsManager() {
     const matchesFile = selectedFile === 'all' || 
       chunk.source_file === selectedFile;
 
-    return matchesSearch && matchesType && matchesFile;
+    const matchesDate = dateFilter === 'all' || (() => {
+      if (!chunk.created_at) return false;
+      const chunkDate = new Date(chunk.created_at);
+      const now = new Date();
+      
+      switch (dateFilter) {
+        case 'today':
+          return chunkDate.toDateString() === now.toDateString();
+        case 'yesterday':
+          const yesterday = new Date(now);
+          yesterday.setDate(yesterday.getDate() - 1);
+          return chunkDate.toDateString() === yesterday.toDateString();
+        case 'week':
+          const weekAgo = new Date(now);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return chunkDate >= weekAgo;
+        case 'month':
+          const monthAgo = new Date(now);
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          return chunkDate >= monthAgo;
+        case 'year':
+          const yearAgo = new Date(now);
+          yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+          return chunkDate >= yearAgo;
+        default:
+          return true;
+      }
+    })();
+
+    return matchesSearch && matchesType && matchesFile && matchesDate;
   });
 
   const uniqueTypes = Array.from(new Set(chunks.map(c => c.metadata?.document_type).filter(Boolean)));
@@ -234,7 +264,7 @@ export default function EmbeddingsManager() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -265,6 +295,19 @@ export default function EmbeddingsManager() {
               {uniqueFiles.map(file => (
                 <option key={file} value={file}>{file}</option>
               ))}
+            </select>
+
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="week">Last 7 days</option>
+              <option value="month">Last month</option>
+              <option value="year">Last year</option>
             </select>
           </div>
 

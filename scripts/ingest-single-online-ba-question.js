@@ -234,7 +234,7 @@ async function processDocument(filePath) {
         has_procedures: containsProcedures(section.content),
         subsection_count: countSubsections(section.content),
         complexity_level: extractComplexityLevel(section.content, section.title),
-        document_type: 'online_ba_questions'
+        document_type: 'online-ba-questions'
       };
     });
     
