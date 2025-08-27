@@ -108,13 +108,13 @@ export default function SearchInterface() {
 
     setIsLoading(true);
     setShowSuggestions(false);
-    setLoadingStatus('🔍 Searching knowledge base...');
+    setLoadingStatus('Searching knowledge base...');
     
     console.log('Searching for:', searchQuery);
     
     try {
       // Get RAG response with AI-generated answer and sources
-      setLoadingStatus('📊 Analyzing your question...');
+      setLoadingStatus('Analyzing your question...');
       
       const ragPromise = fetch('/api/ask', {
         method: 'POST',
@@ -122,10 +122,10 @@ export default function SearchInterface() {
         body: JSON.stringify({ query: searchQuery })
       });
 
-      setLoadingStatus('🤖 Generating AI response...');
+      setLoadingStatus('Generating response...');
       const ragRes = await ragPromise;
 
-      setLoadingStatus('✨ Finalizing results...');
+      setLoadingStatus('Finalizing results...');
 
       if (ragRes.ok) {
         const ragData = await ragRes.json();
@@ -173,7 +173,7 @@ export default function SearchInterface() {
       setActiveTab('answer');
     } catch (error) {
       console.error('Search error:', error);
-      setLoadingStatus('❌ Search failed. Please try again.');
+      setLoadingStatus('Search failed. Please try again.');
       setTimeout(() => setLoadingStatus(''), 3000);
     } finally {
       setIsLoading(false);
