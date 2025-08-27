@@ -57,7 +57,8 @@
       "Bash(git commit:*)",
       "Bash(git config:*)",
       "Bash(python3:*)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": [],
