@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql, hybridSearch } from '@/lib/database';
 import { generateEmbedding } from '@/lib/embeddings';
+import { getRAGSettings } from '@/lib/admin-database';
 
 async function vectorSearch(query: string, limit: number = 10) {
   try {
@@ -40,7 +41,9 @@ async function vectorSearch(query: string, limit: number = 10) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { query, searchType = 'hybrid', limit = 10 } = await req.json();
+    // Get dynamic RAG settings
+    const ragSettings = await getRAGSettings();
+    const { query, searchType = 'hybrid', limit = ragSettings.source_count } = await req.json();
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json(
@@ -71,10 +74,12 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  // Get dynamic RAG settings
+  const ragSettings = await getRAGSettings();
   const { searchParams } = new URL(req.url);
   const query = searchParams.get('q');
   const searchType = searchParams.get('type') || 'hybrid';
-  const limit = parseInt(searchParams.get('limit') || '10');
+  const limit = parseInt(searchParams.get('limit') || ragSettings.source_count.toString());
 
   if (!query) {
     return NextResponse.json(
