@@ -43,6 +43,15 @@ export interface AnalyticsMetrics {
   }>;
 }
 
+export interface RAGSettings {
+  id: number;
+  similarity_threshold: number;
+  source_count: number;
+  confidence_threshold_medium: number;
+  confidence_threshold_high: number;
+  updated_at: Date;
+}
+
 export async function initializeAdminTables() {
   console.log('⚠️  DEPRECATED: Admin tables are now created automatically via initializeDatabase()');
   console.log('   Use the main database initialization instead of this function.');
@@ -226,4 +235,68 @@ export async function getConfidenceTrends(days = 30) {
     GROUP BY DATE(timestamp)
     ORDER BY date DESC;
   `;
+}
+
+// RAG Settings Management
+export async function getRAGSettings(): Promise<RAGSettings> {
+  const result = await sql`
+    SELECT * FROM rag_settings ORDER BY id DESC LIMIT 1;
+  `;
+  
+  if (result.length === 0) {
+    // Return default settings if none exist
+    return {
+      id: 0,
+      similarity_threshold: 0.45,
+      source_count: 5,
+      confidence_threshold_medium: 0.4,
+      confidence_threshold_high: 0.7,
+      updated_at: new Date()
+    };
+  }
+  
+  return result[0] as RAGSettings;
+}
+
+export async function updateRAGSettings(settings: Omit<RAGSettings, 'id' | 'updated_at'>): Promise<RAGSettings> {
+  const result = await sql`
+    INSERT INTO rag_settings (
+      similarity_threshold,
+      source_count, 
+      confidence_threshold_medium,
+      confidence_threshold_high,
+      updated_at
+    ) VALUES (
+      ${settings.similarity_threshold},
+      ${settings.source_count},
+      ${settings.confidence_threshold_medium}, 
+      ${settings.confidence_threshold_high},
+      NOW()
+    )
+    RETURNING *;
+  `;
+  
+  return result[0] as RAGSettings;
+}
+
+export async function initializeRAGSettingsTable() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS rag_settings (
+      id SERIAL PRIMARY KEY,
+      similarity_threshold DECIMAL(3,2) NOT NULL DEFAULT 0.45,
+      source_count INTEGER NOT NULL DEFAULT 5,
+      confidence_threshold_medium DECIMAL(3,2) NOT NULL DEFAULT 0.40,
+      confidence_threshold_high DECIMAL(3,2) NOT NULL DEFAULT 0.70,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+  `;
+  
+  // Insert default settings if table is empty
+  const existing = await sql`SELECT COUNT(*) as count FROM rag_settings;`;
+  if (existing[0].count === 0) {
+    await sql`
+      INSERT INTO rag_settings (similarity_threshold, source_count, confidence_threshold_medium, confidence_threshold_high)
+      VALUES (0.45, 5, 0.40, 0.70);
+    `;
+  }
 }

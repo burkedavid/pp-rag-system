@@ -1,6 +1,7 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { SearchResult } from './database';
 import { getModelIdWithOverride, getModelOptionsForTask } from './ai-config';
+import { getRAGSettings } from './admin-database';
 
 const client = new BedrockRuntimeClient({
   region: process.env.AWS_REGION || 'us-east-1',
@@ -32,17 +33,20 @@ export async function generateRAGResponse(
   query: string,
   searchResults: SearchResult[]
 ): Promise<RAGResponse> {
+  // Fetch dynamic RAG settings
+  const ragSettings = await getRAGSettings();
+  
   // CRITICAL: Anti-hallucination validation
   const maxSimilarity = searchResults.length > 0 ? Math.max(...searchResults.map(r => r.similarity)) : 0;
   
   // If similarity is too low, provide a safe fallback response
-  if (maxSimilarity < 0.5) {
+  if (maxSimilarity < ragSettings.similarity_threshold) {
     return {
       answer: `## Information Not Available
 
 I don't have sufficient information in the documentation to answer your question about "${query}".
 
-The search found some potentially related content, but the similarity scores are too low (below 50%) to provide reliable guidance. This suggests that:
+The search found some potentially related content, but the similarity scores are too low (below ${Math.round(ragSettings.similarity_threshold * 100)}%) to provide reliable guidance. This suggests that:
 
 - The specific procedure you're asking about may not be documented in the available guides
 - The terminology or approach you're describing might not match the system's actual capabilities
@@ -234,23 +238,23 @@ Answer:`;
     // Include FAQ content as quality sources since they contain detailed procedural information
     const qualitySourceCount = howToGuideCount + verifiedContentCount + moduleDocCount + faqContentCount;
     
-    // CRITICAL: Prevent hallucination with strict similarity thresholds
-    if (maxSimilarity < 0.7) {
-      // If best match is below 70%, always medium or low confidence
-      if (maxSimilarity > 0.5 && qualitySourceCount >= 2) {
+    // CRITICAL: Prevent hallucination with dynamic similarity thresholds
+    if (maxSimilarity < ragSettings.confidence_threshold_high) {
+      // If best match is below high threshold, check for medium confidence
+      if (maxSimilarity > (ragSettings.confidence_threshold_high * 0.7) && qualitySourceCount >= 2) {
         confidence = 'medium';
-      } else if (maxSimilarity > 0.4 && qualitySourceCount >= 1) {
+      } else if (maxSimilarity > ragSettings.confidence_threshold_medium && qualitySourceCount >= 1) {
         confidence = 'medium';
       } else {
         confidence = 'low';
       }
     } else {
       // Only allow high confidence with strong similarity AND quality sources
-      if (maxSimilarity > 0.8 && (howToGuideCount >= 2 || verifiedContentCount >= 1)) {
+      if (maxSimilarity > (ragSettings.confidence_threshold_high + 0.1) && (howToGuideCount >= 2 || verifiedContentCount >= 1)) {
         confidence = 'high';
-      } else if (maxSimilarity > 0.75 && qualitySourceCount >= 2) {
+      } else if (maxSimilarity > (ragSettings.confidence_threshold_high + 0.05) && qualitySourceCount >= 2) {
         confidence = 'high';
-      } else if (maxSimilarity > 0.7 && avgSimilarity > 0.6) {
+      } else if (maxSimilarity > ragSettings.confidence_threshold_high && avgSimilarity > (ragSettings.confidence_threshold_high - 0.1)) {
         confidence = 'medium';
       } else {
         confidence = 'medium';

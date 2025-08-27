@@ -16,6 +16,7 @@ import FileUploader from '@/components/rag/FileUploader';
 import IngestionControls from '@/components/rag/IngestionControls';
 import ProgressMonitor from '@/components/rag/ProgressMonitor';
 import EmbeddingsManager from '@/components/admin/EmbeddingsManager';
+import RAGSettings from '@/components/admin/RAGSettings';
 
 interface AnalyticsData {
   analytics: {
@@ -1026,6 +1027,9 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 )}
+
+                {/* RAG System Settings */}
+                <RAGSettings onSettingsChange={loadAnalytics} />
               </div>
             </div>
           </div>

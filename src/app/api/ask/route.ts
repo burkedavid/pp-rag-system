@@ -3,7 +3,7 @@ import { sql, hybridSearch } from '@/lib/database';
 import { generateRAGResponse } from '@/lib/claude';
 import { logAIUsage } from '@/lib/ai-audit';
 import { generateEmbedding } from '@/lib/embeddings';
-import { logQuestion } from '@/lib/admin-database';
+import { logQuestion, getRAGSettings } from '@/lib/admin-database';
 
 async function vectorSearch(query: string, limit: number = 5) {
   try {
@@ -103,7 +103,9 @@ export async function POST(req: NextRequest) {
   let questionLogData: any = null;
   
   try {
-    const { query, limit = 5 } = await req.json();
+    // Get dynamic RAG settings
+    const ragSettings = await getRAGSettings();
+    const { query, limit = ragSettings.source_count } = await req.json();
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json(

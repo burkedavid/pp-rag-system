@@ -55,7 +55,9 @@
       "Bash(claude --version)",
       "Bash(psql:*)",
       "Bash(git commit:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)"
     ],
     "deny": [],
     "ask": [],
