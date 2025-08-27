@@ -17,6 +17,9 @@ A sophisticated AI-powered RAG (Retrieval-Augmented Generation) system for the I
 - **💡 Intelligent Tooltips**: Detailed confidence explanations for user transparency
 - **🔗 Related Questions**: AI-generated software-specific follow-up questions using Claude 4.0
 - **📱 Smooth Navigation**: Auto-scroll to top when clicking related questions for optimal UX
+- **🎛️ Dynamic Admin Controls**: Real-time RAG system configuration with similarity thresholds, source count, and confidence settings
+- **📊 Comprehensive Analytics Dashboard**: Complete query logging, performance metrics, and system optimization insights
+- **🔧 Production-Ready Management**: Advanced embeddings management, content pipeline control, and database administration
 
 ## 🏗️ System Architecture
 
@@ -164,6 +167,158 @@ CREATE TABLE ai_usage_logs (
 
 Visit `http://localhost:3000` to access the modern knowledge base interface.
 
+## 🎛️ Admin Dashboard & RAG Controls
+
+### Admin Interface Overview
+
+Access the comprehensive admin dashboard at `http://localhost:3000/admin` for:
+
+- **📊 System Analytics**: Real-time RAG performance metrics and usage statistics
+- **❓ Question Logs**: Complete query history with confidence scores and source analysis  
+- **🔧 RAG Settings**: Dynamic configuration of system behavior and response quality
+- **📚 Embeddings Management**: Vector database administration and content management
+- **⚙️ RAG Management**: Document ingestion, processing, and content pipeline control
+
+### RAG System Configuration
+
+The admin dashboard includes **dynamic RAG controls** for real-time system tuning:
+
+#### Configurable Settings
+
+**🎯 Similarity Threshold** (0.1 - 1.0)
+- Controls minimum similarity score required to provide an answer
+- **Default: 0.45** - Below this threshold returns "Information Not Available"
+- **Lower values**: More permissive, answers more queries but may reduce accuracy
+- **Higher values**: More strict, only answers high-confidence queries
+
+**📄 Source Count** (1 - 20)  
+- Number of document chunks retrieved for each query
+- **Default: 5** - Balanced between comprehensiveness and processing speed
+- **Lower values**: Faster responses, more focused answers
+- **Higher values**: More comprehensive context, longer processing time
+
+**📈 Medium Confidence Threshold** (0.1 - 1.0)
+- Minimum similarity required for medium confidence rating
+- **Default: 0.50** - Must be above similarity threshold for logical consistency
+
+**🎯 High Confidence Threshold** (0.1 - 1.0)
+- Minimum similarity required for high confidence rating  
+- **Default: 0.70** - Ensures only very relevant matches get high confidence
+
+#### Using Admin Controls
+
+1. **Access Admin Dashboard**: Navigate to `/admin`
+2. **Select RAG Management Tab**: Click the "RAG Management" tab
+3. **Configure Settings**: Use the RAG System Settings panel (right column)
+4. **Real-time Updates**: Changes take effect immediately without restart
+5. **Reset Defaults**: One-click restore to optimal settings
+
+#### Configuration Examples
+
+**Conservative Setup** (High Accuracy):
+```json
+{
+  "similarity_threshold": 0.6,
+  "source_count": 4,  
+  "confidence_threshold_medium": 0.65,
+  "confidence_threshold_high": 0.8
+}
+```
+
+**Permissive Setup** (High Coverage):
+```json
+{
+  "similarity_threshold": 0.3,
+  "source_count": 8,
+  "confidence_threshold_medium": 0.4, 
+  "confidence_threshold_high": 0.6
+}
+```
+
+### Admin Dashboard Features
+
+#### System Analytics
+- **Query Performance**: Average response times and confidence distribution
+- **Usage Trends**: Daily/weekly query patterns and success rates  
+- **Source Quality**: Analysis of document types contributing to answers
+- **Improvement Opportunities**: AI-identified areas for content enhancement
+
+#### Question Logs  
+- **Complete History**: Every query with timestamp, confidence, and similarity scores
+- **Advanced Filtering**: Filter by confidence level, date range, or search terms
+- **Source Analysis**: Detailed breakdown of which documents contributed to each answer
+- **User Insights**: IP tracking and usage patterns for system optimization
+
+#### Embeddings Management
+- **Vector Database Control**: View, update, and manage document embeddings
+- **Content Statistics**: Comprehensive overview of ingested content by type
+- **Quality Metrics**: Embedding generation success rates and processing times
+- **Cleanup Tools**: Remove outdated or duplicate content efficiently
+
+### Database Schema (Admin Tables)
+
+```sql
+-- RAG configuration table
+CREATE TABLE rag_settings (
+    id SERIAL PRIMARY KEY,
+    similarity_threshold DECIMAL(3,2) NOT NULL DEFAULT 0.45,
+    source_count INTEGER NOT NULL DEFAULT 5,
+    confidence_threshold_medium DECIMAL(3,2) NOT NULL DEFAULT 0.50,
+    confidence_threshold_high DECIMAL(3,2) NOT NULL DEFAULT 0.70,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Question logging for analytics
+CREATE TABLE question_logs (
+    id SERIAL PRIMARY KEY,
+    query TEXT NOT NULL,
+    confidence VARCHAR(10) NOT NULL,
+    similarity_score DECIMAL(5,4) NOT NULL,
+    sources_count INTEGER NOT NULL,
+    response_time_ms INTEGER NOT NULL,
+    model_used VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    ip_address INET,
+    -- Additional analytics fields
+    search_results_count INTEGER,
+    how_to_guide_count INTEGER,
+    verified_content_count INTEGER,
+    faq_content_count INTEGER,
+    module_doc_count INTEGER,
+    answer_length INTEGER
+);
+```
+
+### Admin API Endpoints
+
+#### RAG Settings Management
+```bash
+# Get current settings
+curl -X GET http://localhost:3000/api/admin/rag-settings
+
+# Update settings  
+curl -X POST http://localhost:3000/api/admin/rag-settings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "similarity_threshold": 0.45,
+    "source_count": 6,
+    "confidence_threshold_medium": 0.5,
+    "confidence_threshold_high": 0.7
+  }'
+```
+
+#### Analytics & Monitoring
+```bash
+# Get system analytics
+curl -X GET http://localhost:3000/api/admin/analytics?days=30
+
+# Query question logs
+curl -X GET "http://localhost:3000/api/admin/questions?page=1&limit=50"
+
+# Filter by confidence
+curl -X GET "http://localhost:3000/api/admin/questions?confidence=high"
+```
+
 ## 📖 Usage Guide
 
 ### Example Queries
@@ -208,6 +363,8 @@ The system expertly handles questions about all aspects of public protection. **
 - `GET /api/suggestions` - Intelligent query suggestions
 - `POST /api/related` - Generate software-specific follow-up questions using Claude 4.0
 - `GET /api/documents` - List available source documents
+- `GET /api/admin/rag-settings` - Get current RAG system configuration
+- `POST /api/admin/rag-settings` - Update RAG system configuration
 
 ### Response Format
 
