@@ -358,31 +358,32 @@ export async function generateRelatedQuestions(
   answer: string,
   sources: Array<{ source_file: string; section_title: string; similarity: number }>
 ): Promise<string[]> {
-  const prompt = `Based on this user query and answer about the Idox Public Protection System SOFTWARE, generate 4-5 related follow-up questions that users might want to ask next about using the SOFTWARE.
+  const prompt = `You are analyzing documentation for the Idox Public Protection System SOFTWARE to generate related follow-up questions.
+
+IMPORTANT: Generate questions that can DEFINITELY be answered from the available documentation sources listed below.
 
 Original Query: "${originalQuery}"
 
-Answer Summary: ${answer.substring(0, 500)}...
+Answer Given: ${answer.substring(0, 600)}...
 
-Source Documents: ${sources.map(s => s.source_file).join(', ')}
+Available Documentation Sources:
+${sources.map(s => `- ${s.source_file}: ${s.section_title}`).join('\n')}
 
-Generate practical, specific SOFTWARE INTERFACE questions that would naturally arise from this answer. Focus EXCLUSIVELY on Idox software usage:
-- "How do I navigate to [specific screen/module/tab]?"
-- "Where do I find the [specific button/field/option] in Idox?"
-- "How do I generate/print/export [specific report] from the system?"
-- "How do I configure [specific setting] in the software?"
-- "What screens do I use to [perform specific software task]?"
-- "How do I access the [specific form/workflow] in Idox?"
+TASK: Generate 4 related follow-up questions that:
+1. Build naturally from the current answer
+2. Are specific to Idox software interface/usage  
+3. Can be answered from the available source documents listed above
+4. Focus on practical "HOW TO" questions about using the system
 
-EXAMPLES of good software questions:
-- "How do I print a license certificate from Idox?"
-- "Where is the bulk import feature located?"
-- "How do I configure email notifications in the system?"
-- "What screen do I use to view application history?"
+Question Types to Generate:
+- "How do I [specific action] in the [specific module mentioned in sources]?"
+- "Where do I find [specific feature mentioned in the answer] in Idox?"
+- "How do I navigate to [specific screen referenced in sources]?"
+- "What are the steps to [related process from same module]?"
 
-AVOID general questions about requirements, fees, deadlines, or procedures.
+CRITICAL: Only generate questions about topics covered in the source documents. If the answer mentions licensing, only ask licensing questions if licensing sources are available.
 
-Return ONLY a JSON array of SOFTWARE INTERFACE question strings focused on HOW TO USE the Idox system.`;
+Return ONLY a JSON array of 4 question strings that can be answered from the provided documentation sources.`;
 
   try {
     const modelId = getModelIdWithOverride();
