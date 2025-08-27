@@ -588,7 +588,7 @@ export default function SearchInterface() {
                           </h3>
                           <div className="flex items-center gap-2">
                             <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-medium">
-                              {'metadata' in source && source.metadata?.topic_area?.replace('_', ' ').toUpperCase() || source.section_title || 'GENERAL'}
+                              {'metadata' in source && (source.metadata as any)?.topic_area?.replace('_', ' ').toUpperCase() || source.section_title || 'GENERAL'}
                             </span>
                             <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
                               {Math.round(source.similarity * 100)}% match
@@ -614,10 +614,10 @@ export default function SearchInterface() {
                     )}
                     
                     <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed bg-white p-4 rounded-lg border border-blue-100">
-                      {'chunk_text' in source && source.chunk_text ? (
+                      {'chunk_text' in source && (source as any).chunk_text ? (
                         <div 
                           dangerouslySetInnerHTML={{ 
-                            __html: highlightSearchTerms(truncateText(source.chunk_text, 400), query) 
+                            __html: highlightSearchTerms(truncateText((source as any).chunk_text, 400), query) 
                           }}
                         />
                       ) : (
