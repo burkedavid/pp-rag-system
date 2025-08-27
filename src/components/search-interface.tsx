@@ -578,7 +578,7 @@ export default function SearchInterface() {
             {activeTab === 'sources' && ragResponse && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-800">Sources Used in Response</h3>
+                  <h3 className="text-lg font-semibold text-slate-800">Sources Used in RAG Response</h3>
                   <span className="text-sm text-slate-500 bg-blue-100 px-3 py-1 rounded-full">
                     {ragResponse.sources.length} sources used
                   </span>
