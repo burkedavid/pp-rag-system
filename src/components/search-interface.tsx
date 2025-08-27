@@ -134,6 +134,10 @@ export default function SearchInterface() {
         console.log('RAG Response type:', typeof ragData.answer);
         console.log('RAG Answer length:', ragData.answer?.length);
         setRagResponse(ragData);
+        // Set search results from RAG response for Sources tab
+        if (ragData.searchResults) {
+          setSearchResults(ragData.searchResults);
+        }
         saveToHistory(searchQuery, ragData.confidence);
 
         // Generate related questions in the background
@@ -571,7 +575,7 @@ export default function SearchInterface() {
                     {ragResponse.sources.length} sources used
                   </span>
                 </div>
-                {ragResponse.sources.map((source, index) => (
+                {(searchResults.length > 0 ? searchResults.slice(0, ragResponse.sources.length) : ragResponse.sources).map((source, index) => (
                   <div key={`${source.source_file}-${index}`} className="group border border-blue-200 rounded-2xl p-6 hover:border-blue-400 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-blue-50/30">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start gap-3">
@@ -584,7 +588,7 @@ export default function SearchInterface() {
                           </h3>
                           <div className="flex items-center gap-2">
                             <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-medium">
-                              {source.section_title}
+                              {source.metadata?.topic_area?.replace('_', ' ').toUpperCase() || source.section_title || 'GENERAL'}
                             </span>
                             <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
                               {Math.round(source.similarity * 100)}% match
@@ -592,14 +596,38 @@ export default function SearchInterface() {
                           </div>
                         </div>
                       </div>
-                      <ExternalLink className="h-5 w-5 text-blue-600 opacity-50 group-hover:opacity-100 transition-opacity" />
+                      <ExternalLink 
+                        className="h-5 w-5 text-blue-600 opacity-50 group-hover:opacity-100 transition-opacity cursor-pointer" 
+                        onClick={() => {
+                          // In a real implementation, this could link to the full document
+                          alert(`Source: ${source.source_file}\nSection: ${source.section_title || 'N/A'}\n\nNote: External link functionality would typically navigate to the full document.`);
+                        }}
+                      />
                     </div>
                     
+                    {source.section_title && (
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm font-medium text-blue-800">
+                          Section: {source.section_title}
+                        </p>
+                      </div>
+                    )}
+                    
                     <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed bg-white p-4 rounded-lg border border-blue-100">
-                      <p><strong>Section:</strong> {source.section_title}</p>
-                      <p className="mt-2 text-xs text-slate-500">
-                        This source was used in generating the response above with {Math.round(source.similarity * 100)}% relevance match.
-                      </p>
+                      {source.chunk_text ? (
+                        <div 
+                          dangerouslySetInnerHTML={{ 
+                            __html: highlightSearchTerms(truncateText(source.chunk_text, 400), query) 
+                          }}
+                        />
+                      ) : (
+                        <div>
+                          <p><strong>Section:</strong> {source.section_title}</p>
+                          <p className="mt-2 text-xs text-slate-500">
+                            This source was used in generating the response above with {Math.round(source.similarity * 100)}% relevance match.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -182,6 +182,7 @@ export async function POST(req: NextRequest) {
         ...claudeResponse,
         query,
         searchResultCount: searchResults.length,
+        searchResults: searchResults, // Include full search results with content
         note: 'AI-powered response using Claude 4.0 with Amazon Titan semantic search'
       });
       
@@ -228,6 +229,7 @@ export async function POST(req: NextRequest) {
         ...response,
         query,
         searchResultCount: searchResults.length,
+        searchResults: searchResults, // Include full search results with content
         note: 'Fallback mode: Claude 4.0 unavailable, using semantic search'
       });
     }
@@ -364,6 +366,7 @@ export async function GET(req: NextRequest) {
         ...response,
         query,
         searchResultCount: searchResults.length,
+        searchResults: searchResults, // Include full search results with content
         note: 'Fallback mode: Claude 4.0 unavailable, using semantic search'
       });
     }
