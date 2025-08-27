@@ -116,14 +116,15 @@ export default function SearchInterface() {
       // Get RAG response with AI-generated answer and sources
       setLoadingStatus('📊 Analyzing your question...');
       
-      const ragPromise = fetch('/api/ask', {
+      // Give users time to see the analyzing status
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStatus('💡 Generating response...');
+      const ragRes = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchQuery })
       });
-
-      setLoadingStatus('💡 Generating response...');
-      const ragRes = await ragPromise;
 
       setLoadingStatus('✨ Finalizing results...');
 
