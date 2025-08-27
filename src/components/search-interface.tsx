@@ -113,7 +113,7 @@ export default function SearchInterface() {
     console.log('Searching for:', searchQuery);
     
     try {
-      // Start both searches
+      // Get RAG response with AI-generated answer and sources
       setLoadingStatus('📊 Analyzing your question...');
       
       const ragPromise = fetch('/api/ask', {
@@ -122,14 +122,8 @@ export default function SearchInterface() {
         body: JSON.stringify({ query: searchQuery })
       });
 
-      const searchPromise = fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: searchQuery, limit: 10 })
-      });
-
       setLoadingStatus('🤖 Generating AI response...');
-      const [ragRes, searchRes] = await Promise.all([ragPromise, searchPromise]);
+      const ragRes = await ragPromise;
 
       setLoadingStatus('✨ Finalizing results...');
 
@@ -176,11 +170,6 @@ export default function SearchInterface() {
         console.error('RAG request failed:', ragRes.status, await ragRes.text());
       }
 
-      if (searchRes.ok) {
-        const searchData = await searchRes.json();
-        setSearchResults(searchData.results || []);
-      }
-
       setActiveTab('answer');
     } catch (error) {
       console.error('Search error:', error);
@@ -208,7 +197,6 @@ export default function SearchInterface() {
   const handleHomeClick = () => {
     setQuery('');
     setRagResponse(null);
-    setSearchResults([]);
     setRelatedQuestions([]);
     setShowSuggestions(false);
     setActiveTab('answer');
