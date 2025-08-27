@@ -29,7 +29,7 @@ export default function RAGSettings({ onSettingsChange }: RAGSettingsProps) {
   const [formData, setFormData] = useState({
     similarity_threshold: 0.45,
     source_count: 5,
-    confidence_threshold_medium: 0.4,
+    confidence_threshold_medium: 0.5,
     confidence_threshold_high: 0.7
   });
 
@@ -97,7 +97,7 @@ export default function RAGSettings({ onSettingsChange }: RAGSettingsProps) {
     setFormData({
       similarity_threshold: 0.45,
       source_count: 5,
-      confidence_threshold_medium: 0.4,
+      confidence_threshold_medium: 0.5,
       confidence_threshold_high: 0.7
     });
     setError(null);
@@ -105,10 +105,13 @@ export default function RAGSettings({ onSettingsChange }: RAGSettingsProps) {
   };
 
   const handleInputChange = (field: keyof typeof formData, value: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // Only update if the value is valid (not NaN)
+    if (!isNaN(value)) {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
     setError(null);
     setSuccess(null);
   };

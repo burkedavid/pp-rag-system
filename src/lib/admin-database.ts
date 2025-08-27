@@ -249,7 +249,7 @@ export async function getRAGSettings(): Promise<RAGSettings> {
       id: 0,
       similarity_threshold: 0.45,
       source_count: 5,
-      confidence_threshold_medium: 0.4,
+      confidence_threshold_medium: 0.5,
       confidence_threshold_high: 0.7,
       updated_at: new Date()
     };
@@ -296,7 +296,7 @@ export async function initializeRAGSettingsTable() {
   if (existing[0].count === 0) {
     await sql`
       INSERT INTO rag_settings (similarity_threshold, source_count, confidence_threshold_medium, confidence_threshold_high)
-      VALUES (0.45, 5, 0.40, 0.70);
+      VALUES (0.45, 5, 0.50, 0.70);
     `;
   }
 }

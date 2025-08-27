@@ -22,11 +22,17 @@ export async function POST(request: NextRequest) {
     // Validate input
     const { similarity_threshold, source_count, confidence_threshold_medium, confidence_threshold_high } = body;
     
+    // Convert and validate numbers, handling NaN cases
+    const simThreshold = Number(similarity_threshold);
+    const srcCount = Number(source_count);
+    const medThreshold = Number(confidence_threshold_medium);
+    const highThreshold = Number(confidence_threshold_high);
+    
     if (
-      typeof similarity_threshold !== 'number' || similarity_threshold < 0.1 || similarity_threshold > 1.0 ||
-      typeof source_count !== 'number' || source_count < 1 || source_count > 20 ||
-      typeof confidence_threshold_medium !== 'number' || confidence_threshold_medium < 0.1 || confidence_threshold_medium > 1.0 ||
-      typeof confidence_threshold_high !== 'number' || confidence_threshold_high < 0.1 || confidence_threshold_high > 1.0
+      isNaN(simThreshold) || simThreshold < 0.1 || simThreshold > 1.0 ||
+      isNaN(srcCount) || srcCount < 1 || srcCount > 20 || !Number.isInteger(srcCount) ||
+      isNaN(medThreshold) || medThreshold < 0.1 || medThreshold > 1.0 ||
+      isNaN(highThreshold) || highThreshold < 0.1 || highThreshold > 1.0
     ) {
       return NextResponse.json(
         { error: 'Invalid settings values. Similarity and confidence thresholds must be between 0.1-1.0, source count must be 1-20.' },
@@ -34,7 +40,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (confidence_threshold_high <= confidence_threshold_medium) {
+    if (highThreshold <= medThreshold) {
       return NextResponse.json(
         { error: 'High confidence threshold must be greater than medium confidence threshold.' },
         { status: 400 }
@@ -43,10 +49,10 @@ export async function POST(request: NextRequest) {
     
     await initializeRAGSettingsTable();
     const updatedSettings = await updateRAGSettings({
-      similarity_threshold,
-      source_count,
-      confidence_threshold_medium,
-      confidence_threshold_high
+      similarity_threshold: simThreshold,
+      source_count: srcCount,
+      confidence_threshold_medium: medThreshold,
+      confidence_threshold_high: highThreshold
     });
     
     return NextResponse.json(updatedSettings);
