@@ -473,7 +473,7 @@ export default function SearchInterface() {
                         : 'text-slate-600 hover:text-blue-600 hover:bg-blue-100'
                     )}
                   >
-                    Sources ({searchResults.length})
+                    Sources ({ragResponse?.sources?.length || 0})
                   </Button>
                 </div>
               </div>
@@ -575,16 +575,16 @@ export default function SearchInterface() {
               </div>
             )}
 
-            {activeTab === 'sources' && (
+            {activeTab === 'sources' && ragResponse && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-800">Detailed Source Results</h3>
+                  <h3 className="text-lg font-semibold text-slate-800">Sources Used in Response</h3>
                   <span className="text-sm text-slate-500 bg-blue-100 px-3 py-1 rounded-full">
-                    {searchResults.length} documents found
+                    {ragResponse.sources.length} sources used
                   </span>
                 </div>
-                {searchResults.map((result, index) => (
-                  <div key={result.id} className="group border border-blue-200 rounded-2xl p-6 hover:border-blue-400 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-blue-50/30">
+                {ragResponse.sources.map((source, index) => (
+                  <div key={`${source.source_file}-${index}`} className="group border border-blue-200 rounded-2xl p-6 hover:border-blue-400 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-blue-50/30">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start gap-3">
                         <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
@@ -592,14 +592,14 @@ export default function SearchInterface() {
                         </div>
                         <div className="space-y-1">
                           <h3 className="font-semibold text-slate-800 group-hover:text-blue-800 transition-colors text-lg">
-                            {formatSourceFile(result.source_file)}
+                            {formatSourceFile(source.source_file)}
                           </h3>
                           <div className="flex items-center gap-2">
                             <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-medium">
-                              {result.metadata?.topic_area?.replace('_', ' ').toUpperCase() || 'GENERAL'}
+                              {source.section_title}
                             </span>
                             <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
-                              {Math.round(result.similarity * 100)}% match
+                              {Math.round(source.similarity * 100)}% match
                             </span>
                           </div>
                         </div>
@@ -607,20 +607,12 @@ export default function SearchInterface() {
                       <ExternalLink className="h-5 w-5 text-blue-600 opacity-50 group-hover:opacity-100 transition-opacity" />
                     </div>
                     
-                    {result.section_title && (
-                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm font-medium text-blue-800">
-                          Section: {result.section_title}
-                        </p>
-                      </div>
-                    )}
-                    
-                    <div 
-                      className="prose prose-sm max-w-none text-slate-700 leading-relaxed bg-white p-4 rounded-lg border border-blue-100"
-                      dangerouslySetInnerHTML={{ 
-                        __html: highlightSearchTerms(truncateText(result.chunk_text, 400), query) 
-                      }}
-                    />
+                    <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed bg-white p-4 rounded-lg border border-blue-100">
+                      <p><strong>Section:</strong> {source.section_title}</p>
+                      <p className="mt-2 text-xs text-slate-500">
+                        This source was used in generating the response above with {Math.round(source.similarity * 100)}% relevance match.
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
