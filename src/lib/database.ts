@@ -159,6 +159,8 @@ export async function hybridSearch(
         0.7 as weight
       FROM document_chunks
       WHERE 1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) > 0.1
+      ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
+      LIMIT ${limit}
     ),
     keyword_search AS (
       SELECT 
@@ -168,6 +170,8 @@ export async function hybridSearch(
         0.3 as weight
       FROM document_chunks
       WHERE to_tsvector('english', chunk_text) @@ plainto_tsquery('english', ${keywords})
+      ORDER BY ts_rank(to_tsvector('english', chunk_text), plainto_tsquery('english', ${keywords})) DESC
+      LIMIT ${limit}
     ),
     combined AS (
       SELECT *, similarity * weight as weighted_score FROM semantic_search
