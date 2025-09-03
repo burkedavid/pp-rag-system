@@ -49,13 +49,13 @@ async function processFilesDirectly(jobId: string, job: any, files: StoredFile[]
 
     try {
       // Read file content from memory storage
-      const fileContent = uploadedFilesStore[file.path];
-      if (!fileContent) {
+      const storedFile = uploadedFilesStore.get(file.id);
+      if (!storedFile) {
         throw new Error(`File not found in storage: ${file.originalName}`);
       }
 
       // Process markdown content
-      await processMarkdownContent(client, fileContent, file.originalName, options);
+      await processMarkdownContent(client, storedFile.content.toString(), file.originalName, options);
       
       job.processedFiles++;
       job.progress = Math.round((job.processedFiles / job.totalFiles) * 100);
@@ -93,14 +93,14 @@ async function processMarkdownContent(client: BedrockRuntimeClient, content: str
   const maxTokens = options.maxTokens || 800;
   const overlapTokens = options.overlapTokens || 100;
 
-  // Simple chunking logic (similar to the scripts)
+  // Use existing chunking logic
   const chunks = createChunks(content, maxTokens, overlapTokens);
   
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
     
     // Generate embedding
-    const embedding = await generateEmbedding(client, chunk.text);
+    const embedding = await generateEmbedding(chunk.text, client);
     
     // Store in database
     await sql`
@@ -109,9 +109,9 @@ async function processMarkdownContent(client: BedrockRuntimeClient, content: str
         token_count, embedding, metadata
       ) VALUES (
         ${filename},
-        ${chunk.title || 'Content'},
+        ${extractTitle(chunk.text)},
         ${chunk.text},
-        ${i},
+        ${chunk.index || i},
         ${chunk.tokenCount},
         ${JSON.stringify(embedding)},
         ${JSON.stringify({ 
@@ -124,68 +124,6 @@ async function processMarkdownContent(client: BedrockRuntimeClient, content: str
   }
 }
 
-// Generate embedding using Bedrock
-async function generateEmbedding(client: BedrockRuntimeClient, text: string): Promise<number[]> {
-  const input = {
-    modelId: 'amazon.titan-embed-text-v2:0',
-    contentType: 'application/json',
-    accept: 'application/json',
-    body: JSON.stringify({
-      inputText: text,
-      dimensions: 1024,
-      normalize: true
-    }),
-  };
-
-  const command = new InvokeModelCommand(input);
-  const response = await client.send(command);
-  
-  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-  return responseBody.embedding;
-}
-
-// Simple chunking function
-function createChunks(content: string, maxTokens: number, overlapTokens: number) {
-  const estimateTokens = (text: string) => Math.ceil(text.length / 4);
-  const chunks = [];
-  
-  // Split by sections/paragraphs
-  const sections = content.split(/\n\s*\n/);
-  let currentChunk = '';
-  let currentTokens = 0;
-  
-  for (const section of sections) {
-    const sectionTokens = estimateTokens(section);
-    
-    if (currentTokens + sectionTokens > maxTokens && currentChunk) {
-      // Save current chunk
-      chunks.push({
-        text: currentChunk.trim(),
-        title: extractTitle(currentChunk),
-        tokenCount: currentTokens
-      });
-      
-      // Start new chunk with overlap
-      const overlap = currentChunk.slice(-overlapTokens * 4);
-      currentChunk = overlap + '\n\n' + section;
-      currentTokens = estimateTokens(currentChunk);
-    } else {
-      currentChunk += '\n\n' + section;
-      currentTokens += sectionTokens;
-    }
-  }
-  
-  // Add final chunk
-  if (currentChunk.trim()) {
-    chunks.push({
-      text: currentChunk.trim(),
-      title: extractTitle(currentChunk),
-      tokenCount: currentTokens
-    });
-  }
-  
-  return chunks;
-}
 
 // Extract title from chunk
 function extractTitle(text: string): string {
