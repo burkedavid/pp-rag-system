@@ -4,41 +4,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This repository contains comprehensive documentation for the **Idox Public Protection System** - a web-based regulatory case management system for UK Local Authority Public Protection teams. The system integrates Environmental Health, Trading Standards, Licensing, Housing, and related regulatory services into a unified platform.
+This repository contains a **RAG (Retrieval-Augmented Generation) System** for the Idox Public Protection System documentation. It's a sophisticated AI-powered knowledge base that uses Claude 4.0 Sonnet and Amazon Titan v2 embeddings to provide intelligent responses about regulatory compliance, system workflows, and operational procedures for UK Local Authority Public Protection teams.
+
+## System Architecture
+
+**Technology Stack:**
+- **Frontend**: Next.js 15+ with TypeScript and Tailwind CSS
+- **Backend**: Node.js with PostgreSQL and pgvector extension
+- **AI Services**: AWS Bedrock (Claude 4.0 Sonnet + Amazon Titan v2)
+- **Database**: PostgreSQL with 1024-dimensional vector similarity search
+- **Deployment**: Vercel with serverless functions
 
 ## Repository Structure
 
-The codebase consists entirely of documentation organized in the `User Guide/` directory:
-
 ```
-User Guide/
-├── 00-System-Overview.md          # Complete system architecture and introduction
-├── 01-Premises-Management-User-Guide.md        # Central premises database
-├── 02-Inspections-Management-User-Guide.md     # Inspection planning and execution
-├── 03-Complaints-Management-User-Guide.md      # Complaint lifecycle management
-├── 04-Licensing-Management-User-Guide.md       # License administration
-├── 05-Enforcement-Management-User-Guide.md     # Formal enforcement powers
-├── 06-Mobile-Working-User-Guide.md             # Field working capabilities
-├── 07-User-Management-Security-User-Guide.md   # Security and access controls
-├── 08-System-Configuration-User-Guide.md       # System setup and configuration
-├── 09-System-Integrations-User-Guide.md        # External system connections
-├── 10-Reports-Analytics-User-Guide.md          # Performance monitoring and reporting
-├── 14-Samples-Management-User-Guide.md         # Laboratory sample management
-├── 15-Accidents-RIDDOR-User-Guide.md           # Workplace accident reporting
-├── 16-Food-Poisoning-Management-User-Guide.md  # Food safety incident management
-├── 17-Prosecutions-Management-User-Guide.md    # Legal prosecution cases
-├── 18-Dogs-Management-User-Guide.md            # Animal control services
-├── 19-Planning-Management-User-Guide.md        # Planning applications
-├── 20-Grants-Management-User-Guide.md          # Grant administration
-├── 21-Bookings-Management-User-Guide.md        # Facility and resource booking
-├── 22-Initiatives-Management-User-Guide.md     # Public health initiatives
-├── 23-Notices-Management-User-Guide.md         # Legal notice management
-├── 24-GIS-Mapping-User-Guide.md               # Geographic information systems
-├── 25-Communications-Admin-User-Guide.md       # Communication tools
-├── 26-Audit-Trail-User-Guide.md               # System audit capabilities
-├── 27-End-to-End-Regulatory-Processes.md      # Complete workflow scenarios
-├── 28-Daily-Operations-Guide.md               # Day-to-day operational procedures
-└── 29-Role-Based-Handbooks.md                 # User role-specific guidance
+src/
+├── app/                           # Next.js App Router structure
+│   ├── admin/                     # Admin dashboard for RAG management
+│   ├── api/                       # API routes
+│   │   ├── ask/                   # RAG query endpoint (Claude 4.0)
+│   │   ├── search/                # Hybrid vector search
+│   │   ├── rag/ingest/           # Document ingestion system
+│   │   └── admin/                # Admin API routes
+├── components/                    # React components
+│   ├── admin/                     # Admin dashboard components
+│   ├── rag/                       # RAG-specific components
+│   └── ui/                        # UI component library
+└── lib/                          # Core libraries
+    ├── database.ts               # PostgreSQL + pgvector operations
+    ├── claude.ts                 # Claude 4.0 integration
+    ├── embeddings.ts             # Amazon Titan v2 embeddings
+    └── file-storage.ts          # Vercel serverless file handling
+
+scripts/                          # Processing scripts
+├── ingest-faq-documents.js      # FAQ document processing
+├── ingest-module-docs.js        # Module documentation processing
+└── test-rag-quality.js         # System quality testing
+
+User Guide/                       # Source documentation (27 files)
+└── RAG Data/                    # Additional documentation sources
+    ├── FAQs/                    # Frequently asked questions
+    └── Module Documentation/    # Detailed module guides
 ```
 
 ## System Architecture
@@ -60,11 +66,79 @@ The Idox Public Protection System is a **comprehensive web-based regulatory mana
 6. **Reports & Analytics** - Performance monitoring and statutory reporting
 
 ### Technical Architecture
-- **Web-based platform** accessible via modern browsers (Chrome, Firefox, Safari, Edge)
-- **Multi-user environment** with role-based permissions and geographic restrictions
-- **Integration capabilities** with government systems (FSA, HSE, DVLA) and council systems
-- **Mobile working** with offline capability and GPS integration
-- **Document management** with secure file attachments and evidence storage
+- **Modern web application** built with Next.js 15+ and TypeScript
+- **AI-powered search** using hybrid semantic + keyword search (70/30 weighting)
+- **Vector database** with PostgreSQL + pgvector for similarity search
+- **Serverless deployment** optimized for Vercel with edge functions
+- **Professional UI** with blue-themed design and responsive layouts
+- **Admin dashboard** for system configuration and analytics
+
+## Recent RAG System Fixes
+
+### Vercel Serverless Compatibility (January 2025)
+
+**Issue**: RAG document ingestion was completely broken on Vercel deployment, causing infinite loops with no progress updates.
+
+**Root Cause**: The system was using Node.js `child_process.spawn()` which doesn't work in Vercel's serverless environment.
+
+**Solution**: Complete rewrite of the ingestion system (`src/app/api/rag/ingest/route.ts`):
+- **Removed child processes**: Replaced `spawn()` calls with direct inline processing
+- **Added Vercel compatibility**: Used `/tmp` directory for temporary file operations  
+- **Implemented real-time tracking**: Database-based job status updates instead of in-memory state
+- **Fixed file storage**: Corrected file lookup logic for in-memory storage keys
+
+### TypeScript Type Safety Improvements
+
+**Issues Fixed**:
+1. **Property access errors**: `file.path` vs `file.id` type mismatches
+2. **Duplicate function definitions**: Multiple `generateEmbedding` implementations
+3. **Interface conflicts**: `StoredFile` vs `UploadedFileInfo` type confusion
+
+**Solutions**:
+- **Added proper interfaces**: `UploadedFileInfo` type matching frontend file structure
+- **Fixed property access**: Used correct `file.path` property for storage key lookup
+- **Removed duplicates**: Cleaned up redundant function implementations
+- **Type consistency**: Ensured all file operations use matching interfaces
+
+### UI/UX Enhancements
+
+**Improvements Made**:
+- **Professional loading messages**: Replaced robot emoji (🤖) with professional icons (💡)
+- **Improved layout**: Moved ingestion status display closer to "Ingestion Options" for better UX
+- **Better error handling**: Clear error messages and proper status updates
+- **Real-time feedback**: Live progress monitoring during document processing
+
+### Code Quality & Reliability
+
+**Technical Fixes**:
+```typescript
+// Before: Broken child process approach
+const nodeProcess = spawn('node', [scriptFullPath]);
+
+// After: Vercel-compatible direct processing  
+await processFilesDirectly(jobId, job, files, options);
+```
+
+**File Storage Fix**:
+```typescript
+// Before: Incorrect property access
+const storedFile = uploadedFilesStore.get(file.id);
+
+// After: Correct storage key usage
+const storedFile = uploadedFilesStore.get(file.path);
+```
+
+**Type Safety**:
+```typescript
+// Added proper interface for frontend file objects
+interface UploadedFileInfo {
+  originalName: string;
+  fileName: string; 
+  size: number;
+  type: string;
+  path: string; // Storage key
+}
+```
 
 ## Documentation Standards
 
@@ -89,30 +163,61 @@ The Idox Public Protection System is a **comprehensive web-based regulatory mana
 
 ## Common Development Tasks
 
-Since this is a documentation repository with no code files, typical development tasks involve:
+### RAG System Development
+- **API endpoint development**: Creating new routes for search, ingestion, and admin functions
+- **Frontend component development**: Building React components for the admin dashboard and search interface
+- **Database schema updates**: Modifying PostgreSQL tables and adding new indexes
+- **AI integration improvements**: Enhancing Claude 4.0 prompts and embedding generation
+- **Performance optimization**: Improving vector search speed and response times
 
-### Content Updates
-- Editing existing user guide markdown files
-- Adding new sections to existing guides
-- Creating supplementary documentation files
-- Updating workflow examples and screenshots
+### Document Processing & Ingestion
+- **Adding new document types**: Creating specialized ingestion scripts
+- **Improving chunking algorithms**: Optimizing text segmentation for better retrieval
+- **Metadata enhancement**: Adding richer document classification and tagging
+- **Quality testing**: Running comprehensive tests on search accuracy and response quality
 
-### Quality Assurance
-- Ensuring consistency across all documentation files
-- Verifying accuracy of system feature descriptions
-- Maintaining up-to-date procedural guidance
-- Cross-referencing between related modules
+### System Administration
+- **Vercel deployment management**: Handling serverless function limitations and optimizations
+- **Database maintenance**: Managing embeddings, cleaning up old data, optimizing indexes
+- **Admin dashboard features**: Adding new analytics, configuration options, and monitoring tools
+- **Error handling & logging**: Improving system reliability and debugging capabilities
 
-### Content Structure
-- Following established documentation patterns
-- Using consistent heading hierarchy (##, ###, ####)
-- Maintaining numbered file sequence for reading order
-- Including practical examples and use cases
+### Content & Documentation Updates
+- **User guide maintenance**: Updating source documentation in `/User Guide/` directory
+- **FAQ management**: Adding new questions and improving existing answers
+- **System documentation**: Keeping README.md and technical documentation current
+- **Example queries**: Maintaining high-quality example questions for testing
 
 ## Important Notes
 
-- This repository contains **documentation only** - no source code, configuration files, or development tooling
-- The documentation describes a proprietary web-based system (Idox Public Protection System)
-- Content focuses on regulatory compliance for UK Local Authorities
-- All guides are written for end-users of the system, not developers
-- No build processes, testing frameworks, or deployment procedures are applicable
+### Development Environment
+- **TypeScript/Next.js application** with comprehensive build and testing processes
+- **Serverless deployment** optimized for Vercel with specific constraints
+- **Database integration** requires PostgreSQL with pgvector extension
+- **AI services** require AWS Bedrock access with Claude 4.0 and Titan v2 models
+- **Environment variables** must be configured for database and AWS credentials
+
+### Key System Constraints
+- **Vercel serverless limitations**: No child processes, limited execution time, `/tmp` directory usage
+- **File storage**: In-memory storage for uploads due to serverless constraints
+- **Vector dimensions**: Must use 1024-dimensional embeddings (Amazon Titan v2)
+- **Database compatibility**: Requires pgvector extension for similarity search
+
+### Production Considerations
+- **Anti-hallucination requirements**: Strict similarity thresholds prevent incorrect regulatory guidance
+- **Performance optimization**: Vector indexing and hybrid search for sub-second responses
+- **Regulatory compliance**: Professional UI and accurate information for government users
+- **Error handling**: Graceful degradation when insufficient information is available
+
+### Common Commands
+```bash
+# Development
+npm run dev           # Start development server
+npm run build         # Production build with type checking
+npm run typecheck     # TypeScript validation
+
+# RAG System
+node scripts/ingest-faq-documents.js      # Process FAQ documents
+node scripts/ingest-module-docs.js        # Process module documentation
+node scripts/test-rag-quality.js          # Test system accuracy
+```
