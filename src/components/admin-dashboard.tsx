@@ -936,6 +936,15 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Progress Monitor */}
+                {currentJobId && (
+                  <ProgressMonitor
+                    jobId={currentJobId}
+                    onComplete={handleIngestionComplete}
+                    onError={handleIngestionError}
+                  />
+                )}
               </div>
 
               {/* Right Column - Status & Progress */}
@@ -985,15 +994,6 @@ export default function AdminDashboard() {
                       </div>
                     </CardContent>
                   </Card>
-                )}
-
-                {/* Progress Monitor */}
-                {currentJobId && (
-                  <ProgressMonitor
-                    jobId={currentJobId}
-                    onComplete={handleIngestionComplete}
-                    onError={handleIngestionError}
-                  />
                 )}
 
                 {/* Selected Type Info */}
