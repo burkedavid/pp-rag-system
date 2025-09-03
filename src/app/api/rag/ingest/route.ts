@@ -20,6 +20,184 @@ function safeParseJSON(value: any, fallback: any) {
   }
 }
 
+// Vercel-compatible direct file processing
+async function processFilesDirectly(jobId: string, job: any, files: StoredFile[], options: any) {
+  const client = new BedrockRuntimeClient({
+    region: process.env.AWS_REGION || 'us-east-1',
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+  });
+
+  job.totalFiles = files.length;
+  job.processedFiles = 0;
+  
+  await updateJobStatus(jobId, { 
+    logs: [...job.logs, `Processing ${files.length} file(s)...`]
+  });
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    job.currentFile = file.originalName;
+    job.logs.push(`Processing: ${file.originalName} (${i + 1}/${files.length})`);
+    
+    await updateJobStatus(jobId, { 
+      currentFile: job.currentFile,
+      logs: job.logs
+    });
+
+    try {
+      // Read file content from memory storage
+      const fileContent = uploadedFilesStore[file.path];
+      if (!fileContent) {
+        throw new Error(`File not found in storage: ${file.originalName}`);
+      }
+
+      // Process markdown content
+      await processMarkdownContent(client, fileContent, file.originalName, options);
+      
+      job.processedFiles++;
+      job.progress = Math.round((job.processedFiles / job.totalFiles) * 100);
+      job.logs.push(`✓ Completed: ${file.originalName}`);
+      
+      await updateJobStatus(jobId, { 
+        processedFiles: job.processedFiles,
+        progress: job.progress,
+        logs: job.logs
+      });
+
+    } catch (error) {
+      job.logs.push(`✗ Error processing ${file.originalName}: ${error.message}`);
+      await updateJobStatus(jobId, { logs: job.logs });
+      throw error;
+    }
+  }
+
+  // Mark as completed
+  job.status = 'completed';
+  job.progress = 100;
+  job.endTime = new Date();
+  job.logs.push('✓ Ingestion completed successfully');
+  
+  await updateJobStatus(jobId, { 
+    status: 'completed', 
+    progress: 100,
+    logs: job.logs,
+    endTime: job.endTime
+  });
+}
+
+// Process individual markdown content
+async function processMarkdownContent(client: BedrockRuntimeClient, content: string, filename: string, options: any) {
+  const maxTokens = options.maxTokens || 800;
+  const overlapTokens = options.overlapTokens || 100;
+
+  // Simple chunking logic (similar to the scripts)
+  const chunks = createChunks(content, maxTokens, overlapTokens);
+  
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    
+    // Generate embedding
+    const embedding = await generateEmbedding(client, chunk.text);
+    
+    // Store in database
+    await sql`
+      INSERT INTO document_chunks (
+        source_file, section_title, chunk_text, chunk_index, 
+        token_count, embedding, metadata
+      ) VALUES (
+        ${filename},
+        ${chunk.title || 'Content'},
+        ${chunk.text},
+        ${i},
+        ${chunk.tokenCount},
+        ${JSON.stringify(embedding)},
+        ${JSON.stringify({ 
+          topic_area: 'faq', 
+          section_type: 'content',
+          file_type: 'markdown'
+        })}
+      )
+    `;
+  }
+}
+
+// Generate embedding using Bedrock
+async function generateEmbedding(client: BedrockRuntimeClient, text: string): Promise<number[]> {
+  const input = {
+    modelId: 'amazon.titan-embed-text-v2:0',
+    contentType: 'application/json',
+    accept: 'application/json',
+    body: JSON.stringify({
+      inputText: text,
+      dimensions: 1024,
+      normalize: true
+    }),
+  };
+
+  const command = new InvokeModelCommand(input);
+  const response = await client.send(command);
+  
+  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+  return responseBody.embedding;
+}
+
+// Simple chunking function
+function createChunks(content: string, maxTokens: number, overlapTokens: number) {
+  const estimateTokens = (text: string) => Math.ceil(text.length / 4);
+  const chunks = [];
+  
+  // Split by sections/paragraphs
+  const sections = content.split(/\n\s*\n/);
+  let currentChunk = '';
+  let currentTokens = 0;
+  
+  for (const section of sections) {
+    const sectionTokens = estimateTokens(section);
+    
+    if (currentTokens + sectionTokens > maxTokens && currentChunk) {
+      // Save current chunk
+      chunks.push({
+        text: currentChunk.trim(),
+        title: extractTitle(currentChunk),
+        tokenCount: currentTokens
+      });
+      
+      // Start new chunk with overlap
+      const overlap = currentChunk.slice(-overlapTokens * 4);
+      currentChunk = overlap + '\n\n' + section;
+      currentTokens = estimateTokens(currentChunk);
+    } else {
+      currentChunk += '\n\n' + section;
+      currentTokens += sectionTokens;
+    }
+  }
+  
+  // Add final chunk
+  if (currentChunk.trim()) {
+    chunks.push({
+      text: currentChunk.trim(),
+      title: extractTitle(currentChunk),
+      tokenCount: currentTokens
+    });
+  }
+  
+  return chunks;
+}
+
+// Extract title from chunk
+function extractTitle(text: string): string {
+  const lines = text.trim().split('\n');
+  for (const line of lines) {
+    if (line.startsWith('#')) {
+      return line.replace(/^#+\s*/, '').trim();
+    }
+  }
+  return 'Content';
+}
+
 async function updateJobStatus(jobId: string, updates: {
   status?: 'pending' | 'running' | 'completed' | 'failed';
   progress?: number;
@@ -206,107 +384,23 @@ export async function POST(request: NextRequest) {
 
       job.logs.push(`Started ${action === 'full-reingestion' ? 'full re-ingestion' : 'incremental ingestion'} for ${documentType}`);
       
-      // Start ingestion process
-      const scriptFullPath = path.join(process.cwd(), scriptPath);
-      const nodeProcess = spawn('node', [scriptFullPath], {
-        cwd: process.cwd(),
-        env: { ...process.env }
-      });
-
+      // Process files directly in serverless function (Vercel compatible)
       job.status = 'running';
       await updateJobStatus(jobId, { status: 'running' });
-
-      // Add timeout for Vercel compatibility (max 30 seconds)
-      const timeout = setTimeout(async () => {
+      
+      try {
+        // Process uploaded files directly
+        await processFilesDirectly(jobId, job, files, options);
+      } catch (error) {
         job.status = 'failed';
-        job.error = 'Process timed out - likely due to Vercel serverless limitations';
-        job.logs.push('ERROR: Process timed out after 25 seconds');
-        job.logs.push('NOTE: Child processes are not supported in Vercel serverless environment');
+        job.error = error.message;
+        job.logs.push(`ERROR: ${error.message}`);
         await updateJobStatus(jobId, { 
           status: 'failed', 
           error: job.error,
           logs: job.logs 
         });
-        nodeProcess.kill();
-      }, 25000); // 25 second timeout
-
-      // Handle process spawn errors
-      nodeProcess.on('error', async (error) => {
-        clearTimeout(timeout);
-        job.status = 'failed';
-        job.error = `Failed to spawn process: ${error.message}`;
-        job.logs.push(`ERROR: ${job.error}`);
-        job.logs.push('NOTE: Child processes are not supported in Vercel serverless environment');
-        await updateJobStatus(jobId, { 
-          status: 'failed', 
-          error: job.error,
-          logs: job.logs 
-        });
-      });
-
-      // Handle process output
-      nodeProcess.stdout.on('data', async (data) => {
-        const output = data.toString();
-        job.logs.push(output.trim());
-        
-        // Parse progress from output
-        if (output.includes('Processing') && output.includes('/')) {
-          const match = output.match(/(\d+)\/(\d+)/);
-          if (match) {
-            job.processedFiles = parseInt(match[1]);
-            job.totalFiles = parseInt(match[2]);
-            job.progress = Math.round((job.processedFiles / job.totalFiles) * 100);
-            await updateJobStatus(jobId, { 
-              progress: job.progress, 
-              processedFiles: job.processedFiles 
-            });
-          }
-        }
-        
-        // Extract current file being processed
-        if (output.includes('Processing:')) {
-          const fileMatch = output.match(/Processing: (.+)/);
-          if (fileMatch) {
-            job.currentFile = fileMatch[1];
-            await updateJobStatus(jobId, { currentFile: job.currentFile });
-          }
-        }
-        
-        // Update logs periodically
-        await updateJobStatus(jobId, { logs: job.logs });
-      });
-
-      nodeProcess.stderr.on('data', async (data) => {
-        const error = data.toString();
-        job.logs.push(`ERROR: ${error.trim()}`);
-        await updateJobStatus(jobId, { logs: job.logs });
-      });
-
-      nodeProcess.on('close', async (code) => {
-        clearTimeout(timeout); // Clear timeout on process completion
-        job.endTime = new Date();
-        if (code === 0) {
-          job.status = 'completed';
-          job.progress = 100;
-          job.logs.push('Ingestion completed successfully');
-          await updateJobStatus(jobId, { 
-            status: 'completed', 
-            progress: 100,
-            logs: job.logs,
-            endTime: job.endTime
-          });
-        } else {
-          job.status = 'failed';
-          job.error = `Process exited with code ${code}`;
-          job.logs.push(`Process failed with exit code: ${code}`);
-          await updateJobStatus(jobId, { 
-            status: 'failed', 
-            error: job.error,
-            logs: job.logs,
-            endTime: job.endTime
-          });
-        }
-      });
+      }
     }
 
     return NextResponse.json({
