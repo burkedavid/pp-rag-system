@@ -214,9 +214,38 @@ export async function POST(request: NextRequest) {
       });
 
       job.status = 'running';
+      await updateJobStatus(jobId, { status: 'running' });
+
+      // Add timeout for Vercel compatibility (max 30 seconds)
+      const timeout = setTimeout(async () => {
+        job.status = 'failed';
+        job.error = 'Process timed out - likely due to Vercel serverless limitations';
+        job.logs.push('ERROR: Process timed out after 25 seconds');
+        job.logs.push('NOTE: Child processes are not supported in Vercel serverless environment');
+        await updateJobStatus(jobId, { 
+          status: 'failed', 
+          error: job.error,
+          logs: job.logs 
+        });
+        nodeProcess.kill();
+      }, 25000); // 25 second timeout
+
+      // Handle process spawn errors
+      nodeProcess.on('error', async (error) => {
+        clearTimeout(timeout);
+        job.status = 'failed';
+        job.error = `Failed to spawn process: ${error.message}`;
+        job.logs.push(`ERROR: ${job.error}`);
+        job.logs.push('NOTE: Child processes are not supported in Vercel serverless environment');
+        await updateJobStatus(jobId, { 
+          status: 'failed', 
+          error: job.error,
+          logs: job.logs 
+        });
+      });
 
       // Handle process output
-      nodeProcess.stdout.on('data', (data) => {
+      nodeProcess.stdout.on('data', async (data) => {
         const output = data.toString();
         job.logs.push(output.trim());
         
@@ -227,6 +256,10 @@ export async function POST(request: NextRequest) {
             job.processedFiles = parseInt(match[1]);
             job.totalFiles = parseInt(match[2]);
             job.progress = Math.round((job.processedFiles / job.totalFiles) * 100);
+            await updateJobStatus(jobId, { 
+              progress: job.progress, 
+              processedFiles: job.processedFiles 
+            });
           }
         }
         
@@ -235,25 +268,43 @@ export async function POST(request: NextRequest) {
           const fileMatch = output.match(/Processing: (.+)/);
           if (fileMatch) {
             job.currentFile = fileMatch[1];
+            await updateJobStatus(jobId, { currentFile: job.currentFile });
           }
         }
+        
+        // Update logs periodically
+        await updateJobStatus(jobId, { logs: job.logs });
       });
 
-      nodeProcess.stderr.on('data', (data) => {
+      nodeProcess.stderr.on('data', async (data) => {
         const error = data.toString();
         job.logs.push(`ERROR: ${error.trim()}`);
+        await updateJobStatus(jobId, { logs: job.logs });
       });
 
-      nodeProcess.on('close', (code) => {
+      nodeProcess.on('close', async (code) => {
+        clearTimeout(timeout); // Clear timeout on process completion
         job.endTime = new Date();
         if (code === 0) {
           job.status = 'completed';
           job.progress = 100;
           job.logs.push('Ingestion completed successfully');
+          await updateJobStatus(jobId, { 
+            status: 'completed', 
+            progress: 100,
+            logs: job.logs,
+            endTime: job.endTime
+          });
         } else {
           job.status = 'failed';
           job.error = `Process exited with code ${code}`;
           job.logs.push(`Process failed with exit code: ${code}`);
+          await updateJobStatus(jobId, { 
+            status: 'failed', 
+            error: job.error,
+            logs: job.logs,
+            endTime: job.endTime
+          });
         }
       });
     }
