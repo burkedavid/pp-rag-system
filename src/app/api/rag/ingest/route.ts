@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
           await updateJobStatus(jobId, { currentFile: file.originalName, logs: job.logs });
           
           // Get file from memory store
-          const fileId = file.path; // path is actually the fileId for memory storage
+          const fileId = file.id; // Use the correct id property
           const storedFile = uploadedFilesStore.get(fileId);
           
           if (!storedFile) {
