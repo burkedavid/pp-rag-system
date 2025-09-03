@@ -7,6 +7,15 @@ import { sql } from '@/lib/database';
 import { uploadedFilesStore, StoredFile } from '@/lib/file-storage';
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 
+// Type for uploaded file info from frontend
+interface UploadedFileInfo {
+  originalName: string;
+  fileName: string;
+  size: number;
+  type: string;
+  path: string; // This is the storage key
+}
+
 // Jobs are now tracked in database for serverless compatibility
 
 function safeParseJSON(value: any, fallback: any) {
@@ -21,7 +30,7 @@ function safeParseJSON(value: any, fallback: any) {
 }
 
 // Vercel-compatible direct file processing
-async function processFilesDirectly(jobId: string, job: any, files: StoredFile[], options: any) {
+async function processFilesDirectly(jobId: string, job: any, files: UploadedFileInfo[], options: any) {
   const client = new BedrockRuntimeClient({
     region: process.env.AWS_REGION || 'us-east-1',
     credentials: {
