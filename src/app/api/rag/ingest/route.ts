@@ -49,7 +49,7 @@ async function processFilesDirectly(jobId: string, job: any, files: StoredFile[]
 
     try {
       // Read file content from memory storage
-      const storedFile = uploadedFilesStore.get(file.id);
+      const storedFile = uploadedFilesStore.get(file.path);
       if (!storedFile) {
         throw new Error(`File not found in storage: ${file.originalName}`);
       }
@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
           await updateJobStatus(jobId, { currentFile: file.originalName, logs: job.logs });
           
           // Get file from memory store
-          const fileId = file.id; // Use the correct id property
+          const fileId = file.path; // path contains the actual storage key
           const storedFile = uploadedFilesStore.get(fileId);
           
           if (!storedFile) {
